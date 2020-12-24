@@ -1,0 +1,52 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <center>
+        <header>
+            <h1>
+                Добро пожаловать в игру "Менеджмент"
+            </h1>
+        </header>
+        <hr>
+        <div class="vertical-content">
+            <span>
+                Для входа в систему введите логин и пароль
+            </span>
+            <input id="login"
+                name="username"
+                type="text"
+                placeholder="Введите логин"
+                minlength="4"
+                maxlength="12"
+                required
+                title="4-12 символов: буквы, цифры, _"
+            >
+            <span class="error-text" id="error-login" hidden>Неверно введенный логин</span>
+            <input id="password"
+                type="password"
+                name="password"
+                placeholder="Введите пароль"
+                minlength="6"
+                maxlength="15"
+                required
+                title="6-15 символов: буквы, цифры, _"
+            >
+            <span class="error-text" id="error-password" hidden>Неверно введенный пароль</span>
+            <div>
+                <button class="custom-btn" id="registerBtn"><a href="registration/">Регистрация</a></button>
+                <button class="custom-btn" id="signUpBtn" disabled>Войти</button>
+            </div>
+        </div>
+    </center>
+</body>
+
+<script src="{% static 'js/auth.js' %}" type="module"></script>
+</html>

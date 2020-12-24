@@ -1,0 +1,71 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <center>
+        <header>
+            <h1>
+                Добро пожаловать в игру "Менеджмент"
+            </h1>
+        </header>
+        <hr>
+        <div class="vertical-content">
+            <span>Выберите аватар</span>
+            <div class="horizontal-container">
+                <button id="prev-arrow" class="arrow prev-arrow"></button>
+                <div id="avatars" class="horisontal-container">
+                </div>
+                <button id="next-arrow" class="arrow next-arrow"></button>
+            </div>
+            <input id="login"
+                name="username"
+                type="text"
+                placeholder="Введите логин"
+                required
+                title="4-12 символов: буквы, цифры, _"
+            >
+            <span class="error-text" id="error-login" hidden>Неверно введенный логин</span>
+
+            <input id="email"
+                name="email"
+                type="email"
+                placeholder="Введите email"
+                required
+            >
+            <span class="error-text" id="error-email" hidden>Неверно введенный email</span>
+
+            <input id="password"
+                name="password"
+                type="password"
+                placeholder="Введите пароль"
+                required
+                title="6-15 символов: буквы, цифры, _"
+            >
+            <span class="error-text" id="error-password" hidden>Неверно введенный пароль</span>
+
+            <input id="passwordRepeat"
+                name="passwordRepeat"
+                type="password"
+                placeholder="Введите пароль ещё раз"
+                required
+                title="6-15 символов: буквы, цифры, _"
+            >
+            <span class="error-text" id="error-password-repeat" hidden>Неверно введенный повторный пароль</span>
+
+            <span class="error-text" id="not-equal-passwords" hidden>Пароли не совпадают</span>
+
+            <div>
+                <button class="custom-btn" id="registerBtn" disabled>Зарегистрироваться</button>
+            </div>
+        </div>
+    </center>
+    <script src="{% static 'js/register.js' %}" type="module"></script>
+</body>
+</html>

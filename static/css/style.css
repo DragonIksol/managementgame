@@ -1,0 +1,99 @@
+.page-container {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+}
+
+.vertical-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.vertical-content input {
+    width: 200px;
+    margin: 5px;
+}
+.custom-btn {
+    min-width: 100px;
+}
+
+.horizontal-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.back-arrow {
+    align-self: flex-start;
+}
+
+footer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 3vh;
+}
+
+button {
+    cursor: pointer;
+}
+button:disabled {
+    cursor: default;
+    pointer-events: none;
+}
+button a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.error-text {
+    color: red;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    margin: 3px;
+}
+.avatar-icon {
+    width: 40px;
+    height: 40px;
+    margin: 3px;
+}
+
+.arrow {
+    background-size: cover;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    outline: none;
+}
+.arrow:hover {
+    filter: brightness(75%)
+}
+
+.next-arrow {
+    background-image: url('/static/resources/images/next-arrow.png');
+}
+.prev-arrow {
+    background-image: url('/static/resources/images/prev-arrow.png');
+}
+
+.round-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    outline: none;
+}
+
+.count-players {
+    align-self: flex-start;
+    background-color: white;
+    border: 3px solid black;
+}
