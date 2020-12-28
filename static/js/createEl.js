@@ -3,11 +3,15 @@ function createEl(type, cfg) {
     for (let attr in cfg) {
         if (attr === 'children') {
             cfg[attr].forEach((element) => {
-                el.appendChild(createEl(element.type, element));
+                if (element instanceof HTMLElement) {
+                    el.appendChild(element);
+                } else {
+                    el.appendChild(createEl(element.type, element));
+                }
             });
             continue;
         }
-        if (attr === 'type') continue;
+        if (attr === 'elType') continue;
         el[attr] = cfg[attr];
     }
 

@@ -4,10 +4,12 @@ customElements.define('base-window',
             super();
         }
         hide(){
-          this.style.display = 'none';
+            this.style.display = 'none';
         }
-        close(){
-          this.parentNode.removeChild(this);
+        close() {
+            this.dispatchEvent(new Event('close'));
+            // this.addEventListener('close', (e)=> {e.stopPropagation()})
+            this.parentNode.removeChild(this);
         }
         connectedCallback() {
             this.innerHTML = `
@@ -39,7 +41,8 @@ customElements.define('base-window',
                 .win-content {
                     height: 75%;
                     display: flex;
-                    flex-direction: column
+                    flex-direction: column;
+                    overflow: auto
                 }
                 .window footer {
                     display: flex;

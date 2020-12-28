@@ -64,6 +64,7 @@ createRoomBtn.onclick = (e) => {
     }
     createBtn.onclick = async (e) => {
         let playersCount = Number(currentCountBtn.textContent);
+        let startBtn = null;
         roomName = roomName.value;
 
         try {
@@ -86,7 +87,7 @@ createRoomBtn.onclick = (e) => {
             let roomId = obj.room_id;
 
             let roomWnd = document.createElement('base-window');
-            roomWnd.setAttribute('winTitle', `Созданная вами комната: ${roomName}\t 1/${playersNumber}`);
+            roomWnd.setAttribute('winTitle', `Созданная вами комната: ${roomName}\t 1/${playersCount}`);
             document.body.appendChild(roomWnd);
 
             let roomContent = roomWnd.querySelector('#win-content');
@@ -97,25 +98,61 @@ createRoomBtn.onclick = (e) => {
                     <tr>
                         <td>№</td>
                         <td>Никнейм участника</td>
-                        <td>Удалить</td>
                     </tr>
                     <tr>
-                        <td>1</td>
+                        <td>0</td>
                         <td>${window.USERNAME}</td>
-                        <td>X</td>
                     </tr>
                 </tbody>
                 </table>
             `;
 
+            let roomTableBody = roomContent.querySelector('tbody');
+
+            let updateTableInterval = setInterval(async () => {
+                let response = await fetch('createRoom?' + new URLSearchParams({
+                    room_id: roomId
+                }), {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    }
+                });
+                let obj = await response.json();
+                if (obj.error) throw new Error(obj.error);
+                let data = obj.data;
+                roomTableBody.innerHTML = `
+                    <tr>
+                        <td>№</td>
+                        <td>Никнейм участника</td>
+                    </tr>
+                `;
+                roomWnd.setAttribute('winTitle', `Созданная вами комната: ${roomName}\t ${data.length}/${playersCount}`);
+                data.forEach((el, index) => {
+                    roomTableBody.innerHTML += `
+                        <tr player_id=${el.player_id}>
+                            <td>${index}</td>
+                            <td>${el.player_name}</td>
+                        </tr>
+                    `
+                });
+                if (startBtn) {
+                    startBtn.disabled = data.length !== playersCount;
+                }
+
+            }, 1000);
+
             let roomBottomTools = roomWnd.querySelector('footer');
             roomBottomTools.innerHTML = `
                 <button id="cancel2">Отмена</button>
-                <button id="create" disabled>Старт</button>
+                <button id="start" disabled>Старт</button>
             `;
             let cancelBtn2 = roomBottomTools.querySelector('#cancel2');
-            cancelBtn2.onclick = (e) => {
-
+            startBtn = roomBottomTools.querySelector('#start');
+            cancelBtn2.onclick = async (e) => {
+                roomWnd.close();
+            }
+            roomWnd.addEventListener('close', async () => {
                 let response = await fetch('createRoom/', {
                     method: 'DELETE',
                     headers: {
@@ -123,14 +160,24 @@ createRoomBtn.onclick = (e) => {
                     },
                     body: JSON.stringify({
                         room_id: roomId,
+                        is_creator: true
                     })
                 });
                 let obj = await response.json();
 
                 if (obj.error) throw new Error(obj.error);
-
-                roomWnd.close();
-            }
+                clearInterval(updateTableInterval)
+            });
+            startBtn.onclick = async (e) => {
+                let response = await fetch('startGame/?' + new URLSearchParams({
+                    room_id: roomId
+                }), {
+                    method: 'POST'
+                })
+                let obj = await response.json();
+                if (obj.error) throw new Error(obj.error);
+                window.location.href = '/game/';
+            };
         } catch (e) {
             console.log(e.stack);
             alert('Не удалось создать комнату');
@@ -140,14 +187,167 @@ createRoomBtn.onclick = (e) => {
 }
 
 searchRoomBtn.onclick = (e) => {
-    searchRoomWnd = document.createElement('base-window');
-    searchRoomWnd.setAttribute('winTitle', 'Поиск комнаты');
+    let searchRoomWnd = document.createElement('base-window');
+    searchRoomWnd.setAttribute('winTitle', 'Выберите комнату');
     document.body.appendChild(searchRoomWnd);
+    let checkedRoom = null;
+    let selectBtn;
+    let onCheckRoom = (e) => {
+        if (e.target.checked) {
+            checkedRoom = Number(e.target.value);
+            selectBtn.disabled = false;
+        }
+    };
 
-    let searchRoomContent = searchRoomWnd.querySelector('#win-content');
-    searchRoomContent.innerHTML = `
-        <span for="roomName">Нет доступных комнат</span>
+    let roomContent = searchRoomWnd.querySelector('#win-content');
+
+    roomContent.innerHTML = `
+        <table border="1">
+        <tbody>
+        </tbody>
+        </table>
     `;
+
+    let roomTableBody = roomContent.querySelector('tbody');
+
+    let updateTableInterval = setInterval(async () => {
+        let response = await fetch('searchRooms/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            }
+        });
+        let obj = await response.json();
+        if (obj.error) throw new Error(obj.error);
+        let data = obj.data;
+
+        roomTableBody.innerHTML = `
+            <tr>
+                <td>Количество мест</td>
+                <td>Название комнаты</td>
+                <td></td>
+            </tr>
+        `;
+        data.forEach((el) => {
+            let tr = createEl('tr', {
+                room_id: el.room_id,
+                children: [
+                    createEl('td', {
+                        textContent: `${el.number_of_seats}/${el.players_count}`
+                    }),
+                    createEl('td', {
+                        textContent: el.room_name
+                    }),
+                    createEl('td', {
+                        children: [
+                            (() => {
+                                let input = createEl('input', {
+                                    type: 'radio',
+                                    name: 'room',
+                                    value: el.room_id
+                                });
+                                if (checkedRoom == el.room_id) input.setAttribute('checked', true);
+                                input.onchange = onCheckRoom;
+                                return input;
+                            })()
+                        ]
+                    })
+                ]
+            });
+            roomTableBody.appendChild(tr);
+        });
+    }, 1000);
+    let clearIntervalWnd = async () => {
+        if (checkedRoom) {
+            let response = await fetch('createRoom/', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    room_id: checkedRoom,
+                    is_creator: false
+                })
+            });
+            let obj = await response.json();
+
+            if (obj.error) throw new Error(obj.error);
+        }
+        clearInterval(updateTableInterval)
+    }
+    searchRoomWnd.addEventListener('close', clearIntervalWnd);
+
+    let roomBottomTools = searchRoomWnd.querySelector('footer');
+
+    roomBottomTools.innerHTML = `
+        <button id="cancel-search">Отмена</button>
+        <button id="select-search" disabled>Выбрать</button>
+    `;
+
+    let cancelBtn = roomBottomTools.querySelector('#cancel-search');
+    cancelBtn.onclick = async () => {
+        searchRoomWnd.close()
+    }
+    selectBtn = roomBottomTools.querySelector('#select-search');
+    selectBtn.onclick = async () => {
+        clearInterval(updateTableInterval);
+        searchRoomWnd.removeEventListener('close', clearIntervalWnd);
+        // let checkedRadio = roomTableBody.querySelector('input[name="room"]:checked');
+        let response = await fetch('createRoom/', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                room_id: checkedRoom
+            })
+        });
+        let obj = await response.json();
+        if (obj.error) throw new Error(obj.error);
+        let isDeletedRoom = false;
+        let waitGame = setInterval(async () => {
+            let response = await fetch('startGame?' + new URLSearchParams({
+                room_id: checkedRoom
+            }), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                }
+            });
+            let obj = await response.json();
+            if (obj.game_started) {
+                window.location.href = '/game/';
+            };
+            if (obj.room_closed) {
+                alert('Комната удалена');
+                isDeletedRoom = true;
+                searchRoomWnd.close();
+            };
+        }, 1000);
+        searchRoomWnd.addEventListener('close', async () => {
+            if (!isDeletedRoom) {
+                let response = await fetch('createRoom/', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        room_id: checkedRoom,
+                        is_creator: false
+                    })
+                });
+                let obj = await response.json();
+
+                if (obj.error) throw new Error(obj.error);
+            };
+            clearInterval(waitGame)
+        });
+    }
+
+    // let searchRoomContent = searchRoomWnd.querySelector('#win-content');
+    // searchRoomContent.innerHTML = `
+    //     <span for="roomName">Нет доступных комнат</span>
+    // `;
 }
 
 
