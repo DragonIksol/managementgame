@@ -1,3 +1,4 @@
+from django.core.checks.messages import Error
 from game.models import Game, PlayerGameInfo
 import json
 from django.db.models.query_utils import select_related_descend
@@ -165,13 +166,26 @@ class StartGame(View):
 
     def post(self, request, *args, **kwargs):
         error = None
-        params = request.POST
+        params = json.loads(request.body)
         room_id = params.get('room_id')
-        print(request.POST)
+        print(params)
 
         try:
+            if room_id is None:
+                raise Error('Комната не найдена')
             room = Game.objects.get(id=room_id)
-            room.step = 0
+            room.step = 1
+            room.level = 3
+            players_info = PlayerGameInfo.objects.filter(room_id=room.id)
+            for player in players_info:
+                player.capital = 10000
+                player.esm = 4
+                player.egp = 2
+                player.simple_fabric_count = 2
+                if player.player_id.id == request.user.id:
+                    player.senior_player = True
+
+                player.save()
             print('game_start')
             room.save()
         except BaseException as err:
@@ -179,5 +193,5 @@ class StartGame(View):
             error = str(err)
 
         return JsonResponse({
-            error: error
+            'error': error
         })

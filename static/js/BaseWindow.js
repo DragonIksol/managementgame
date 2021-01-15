@@ -1,3 +1,5 @@
+let baseWindowTemplate = document.createElement('template');
+
 customElements.define('base-window',
     class BaseWindow extends HTMLElement {
         constructor() {
@@ -8,7 +10,6 @@ customElements.define('base-window',
         }
         close() {
             this.dispatchEvent(new Event('close'));
-            // this.addEventListener('close', (e)=> {e.stopPropagation()})
             this.parentNode.removeChild(this);
         }
         connectedCallback() {
@@ -30,7 +31,8 @@ customElements.define('base-window',
                     height: 50vh;
                     background-color: rgba(255, 255, 255, 1);
                     border-radius: 20px;
-                    padding: 20px
+                    padding: 20px;
+                    box-shadow: 0 0 20px rgba(0,0,0,1);
                 }
                 .window header {
                     display: flex;
@@ -54,9 +56,18 @@ customElements.define('base-window',
                     <div class= "window">
                         <header>
                             <span>${this.getAttribute('winTitle')}</span>
-                            <span
+                            <div
                                 id="close-window"
-                                style="cursor: pointer; font-size: 16pt;">x</span>
+                                style="
+                                    cursor: pointer;
+                                    font-size: 12pt;
+                                    background-color: red;
+                                    color: white;
+                                    width: 20px;
+                                    height: 20px;
+                                    border-radius: 50%;
+                                    text-align: center"
+                            >x</div>
                         </header>
                         <hr>
                         <div id="win-content" class="win-content">
@@ -73,7 +84,11 @@ customElements.define('base-window',
                     </div>
                 </div>
             `
-            this.querySelector('#close-window').onclick = () => {this.close()}
+            this.querySelector('#close-window').onclick = () => { this.close() };
+        }
+
+        disconnectedCallback() {
+            
         }
     }
 )

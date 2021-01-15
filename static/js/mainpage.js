@@ -121,6 +121,7 @@ createRoomBtn.onclick = (e) => {
                 let obj = await response.json();
                 if (obj.error) throw new Error(obj.error);
                 let data = obj.data;
+                while (roomTableBody.firstChild) roomTableBody.removeChild(roomTableBody.lastChild);
                 roomTableBody.innerHTML = `
                     <tr>
                         <td>№</td>
@@ -169,11 +170,12 @@ createRoomBtn.onclick = (e) => {
                 clearInterval(updateTableInterval)
             });
             startBtn.onclick = async (e) => {
-                let response = await fetch('startGame/?' + new URLSearchParams({
-                    room_id: roomId
-                }), {
-                    method: 'POST'
-                })
+                let response = await fetch('startGame/', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        room_id: roomId
+                    })
+                });
                 let obj = await response.json();
                 if (obj.error) throw new Error(obj.error);
                 window.location.href = '/game/';
@@ -221,6 +223,7 @@ searchRoomBtn.onclick = (e) => {
         if (obj.error) throw new Error(obj.error);
         let data = obj.data;
 
+        while (roomTableBody.firstChild) roomTableBody.removeChild(roomTableBody.lastChild);
         roomTableBody.innerHTML = `
             <tr>
                 <td>Количество мест</td>
