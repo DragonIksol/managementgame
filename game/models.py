@@ -12,6 +12,7 @@ class Game(models.Model):
     room_name = models.CharField(max_length=100)
     players_count = models.IntegerField()
     step = models.IntegerField(null=True, blank=True)
+    level = models.IntegerField(null=True, default=3)
 
 
 class EGPRequest(models.Model):
@@ -46,6 +47,7 @@ class PlayerGameInfo(models.Model):
     simple_fabric_count = models.IntegerField(null=True, blank=True)
     esm = models.IntegerField(null=True, blank=True)
     egp = models.IntegerField(null=True, blank=True)
+    senior_player = models.BooleanField(null=True, default=False)
     esm_request_id = models.ForeignKey(ESMRequest, null=True, blank=True, on_delete=models.SET_NULL)
     egp_request_id = models.ForeignKey(EGPRequest, null=True, blank=True, on_delete=models.SET_NULL)
 

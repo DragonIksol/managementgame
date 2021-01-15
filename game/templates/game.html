@@ -7,28 +7,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Игра менеджмент</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/game.css' %}">
     <script src="{% static '/js/BaseWindow.js' %}"></script>
+    <script type="module" src="{% static '/js/PlayerCard.js' %}"></script>
 </head>
 <body>
-    <center class="page-container">
-        <header>
-            <h1>
-                Добро пожаловать в игру "Менеджмент"
-            </h1>
-            <hr>
-        </header>
-        <div class="main-container">
-
+    <div class="main-container">
+        <div class="game-cards-container">
+            {% for player in players_data %}
+                <player-card
+                    avatarPath="{{ player.avatar_path }}"
+                    playerName="{{ player.username }}"
+                    id="{{ player.player_id }}"
+                ></player-card>
+            {% endfor %}
         </div>
-        <footer>
-            <img class="avatar-icon" src="{{ avatar_path }}" alt=" ">
-            <span id="userName">{{ player }}</span>
-        </footer>
-    </center>
-    {% comment %} <base-window winTitle="Тестовое окно"></base-window> {% endcomment %}
+        <div class="horizontal-container bottom-tools">
+            <div class="container flex-start">
+                <div class="horizontal-container">
+                    <b>Лог игры</b>
+                    <button id="surrenderBtn" class="red-button">Сдаться</button>
+                </div>
+                <textarea name="log" id="" cols="30" rows="10" readonly></textarea>
+            </div>
+            {% comment %} <div class="container flex-start">
+                <b>Действия</b>
+                <div>
+                    <button id="buyESMBtn" class="action-btn">Купить ЕСМ</button>
+                    <button id="sellEGPBtn" class="action-btn">Продать ЕГП</button>
+                    <button id="produceBtn" class="action-btn">Производство продукции</button>
+                    <button id="buildRequestBtn" class="action-btn">Заявка на строительство</button>
+                    <button id="automatizationRequestBtn" class="action-btn">Заявка на автоматизацию</button>
+                    <button id="loanRequestBtn" class="action-btn">Заявка на получение ссуды</button>
+                </div>
+            </div> {% endcomment %}
+            <div class="container flex-start">
+                <b>Банк</b>
+                <fieldset class="horizontal-container">
+                    <div>
+                        <b>ЕГП:</b>
+                        <div>
+                            <button class="short-btn">Количество: <span id="EGPBank"></span></button>
+                            <button class="short-btn">Максимальная цена: <span id="maxSellEGP"></span></button>
+                        </div>
+                    </div>
+                    <div>
+                        <b>ЕСМ:</b>
+                        <div>
+                            <button class="short-btn">Количество: <span id="ESMBank"></span></button>
+                            <button class="short-btn">Минимальная цена: <span id="minBuyESM"></span></button>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
 </body>
 <script>
-    window.USERNAME = '{{ player }}';
+    window.USERNAME = '{{ player_name }}';
+    window.USERID = {{ player_id }};
+    window.GAME_ID = '{{ game_id }}';
 </script>
-<script src="{% static 'js/mainpage.js' %}" type="module"></script>
+<script src="{% static 'js/gamepage.js' %}" type="module"></script>
 </html>
