@@ -4,6 +4,15 @@ const template = document.createElement('template');
 template.innerHTML = `
 <link rel="stylesheet" href="/static/css/style.css">
 <link rel="stylesheet" href="/static/css/game.css">
+<style>
+* {
+    color: black;
+    margin: 0;
+}
+button {
+    height: 36px;
+}
+</style>
 <div class="player-card">
     <div class="action-container">
         <button id="buyESMBtn" class="action-btn">Купить ЕСМ</button>
@@ -29,27 +38,29 @@ template.innerHTML = `
             <span>Строящиеся фабрики: <span id="buildFabrics"></span></span>
         </div>
     </div>
-    <table border="1">
-        <tr>
-            <th>Вид единицы</th>
-            <th>Количество</th>
-            <th>Цена</th>
-            <th>Итого</th>
-        </tr>
-        <tr>
-            <td>Купленные единицы</td>
-            <td id="boughtCount"></td>
-            <td id="boughtCost"></td>
-            <td id="boughtResult"></td>
-        </tr>
-        <tr>
-            <td>Проданные единицы</td>
-            <td id="soldCount"></td>
-            <td id="soldCost"></td>
-            <td id="soldResult"></td>
-        </tr>
-    </table>
-    <span id="player_turn_span">Игрок совершает ход</span>
+    <div class="horizontal-container">
+        <table border="1">
+            <tr>
+                <th>Вид единицы</th>
+                <th>Количество</th>
+                <th>Цена</th>
+                <th>Итого</th>
+            </tr>
+            <tr>
+                <td>Купленные единицы</td>
+                <td id="boughtCount"></td>
+                <td id="boughtCost"></td>
+                <td id="boughtResult"></td>
+            </tr>
+            <tr>
+                <td>Проданные единицы</td>
+                <td id="soldCount"></td>
+                <td id="soldCost"></td>
+                <td id="soldResult"></td>
+            </tr>
+        </table>
+        <span id="player_turn_span">Игрок совершает ход</span>
+    </div>
 </div>`
 
 customElements.define('player-card',

@@ -19,8 +19,8 @@ createRoomBtn.onclick = (e) => {
     let createRoomContent = createRoomWnd.querySelector('#win-content');
     createRoomContent.innerHTML = `
         <label for="roomName">Введите название комнаты:</label>
-        <input id="roomName" title="От 1 до 25 символов: буквы, цифры, _, -">
-        <label>Выберете количество игроков:</label>
+        <input id="roomName" title="От 1 до 25 символов: буквы, цифры, _, -" placeholder="Название комнаты">
+        <label>Выберите количество игроков:</label>
         <div class="horizontal-container">
             <button class="round-btn count-players">2</button>
             <button class="round-btn count-players">3</button>
@@ -30,8 +30,8 @@ createRoomBtn.onclick = (e) => {
 
     let createRoomBottomTools = createRoomWnd.querySelector('footer');
     createRoomBottomTools.innerHTML = `
-        <button id="cancel">Отмена</button>
-        <button id="create" disabled>Создать</button>
+        <button class="middle-button" id="cancel">Отмена</button>
+        <button class="middle-button" id="create" disabled>Создать</button>
     `;
     let cancelBtn = createRoomBottomTools.querySelector('#cancel');
     cancelBtn.onclick = (e) => {
@@ -44,8 +44,8 @@ createRoomBtn.onclick = (e) => {
     let roomName = createRoomWnd.querySelector('#roomName');
     countBtns.forEach((el) => {
         el.onclick = (e) => {
-            currentCountBtn && (currentCountBtn.style.borderColor = 'black');
-            el.style.borderColor = 'green';
+            currentCountBtn && currentCountBtn.classList.remove('checked-count-players');
+            el.classList.add('checked-count-players');
             currentCountBtn = el;
 
             createBtn.disabled = !(
@@ -145,8 +145,8 @@ createRoomBtn.onclick = (e) => {
 
             let roomBottomTools = roomWnd.querySelector('footer');
             roomBottomTools.innerHTML = `
-                <button id="cancel2">Отмена</button>
-                <button id="start" disabled>Старт</button>
+                <button class="middle-button" id="cancel2">Отмена</button>
+                <button class="middle-button" id="start" disabled>Старт</button>
             `;
             let cancelBtn2 = roomBottomTools.querySelector('#cancel2');
             startBtn = roomBottomTools.querySelector('#start');
@@ -283,8 +283,8 @@ searchRoomBtn.onclick = (e) => {
     let roomBottomTools = searchRoomWnd.querySelector('footer');
 
     roomBottomTools.innerHTML = `
-        <button id="cancel-search">Отмена</button>
-        <button id="select-search" disabled>Выбрать</button>
+        <button class="middle-button" id="cancel-search">Отмена</button>
+        <button class="middle-button" id="select-search" disabled>Выбрать</button>
     `;
 
     let cancelBtn = roomBottomTools.querySelector('#cancel-search');

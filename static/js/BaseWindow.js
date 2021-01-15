@@ -29,10 +29,11 @@ customElements.define('base-window',
                 .window {
                     width: 50vw;
                     height: 50vh;
-                    background-color: rgba(255, 255, 255, 1);
+                    font-size: 14pt;
+                    background-color: rgba(0, 0, 0, 1);
                     border-radius: 20px;
                     padding: 20px;
-                    box-shadow: 0 0 20px rgba(0,0,0,1);
+                    box-shadow: 0 0 20px rgb(0,255,255);
                 }
                 .window header {
                     display: flex;
@@ -66,7 +67,9 @@ customElements.define('base-window',
                                     width: 20px;
                                     height: 20px;
                                     border-radius: 50%;
-                                    text-align: center"
+                                    text-align: center;
+                                    box-shadow: 0 0 10px 5px red;
+                                "
                             >x</div>
                         </header>
                         <hr>

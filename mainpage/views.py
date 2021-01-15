@@ -121,6 +121,8 @@ class SearchRoomsView(View):
             for room in rooms:
                 number_of_seats = len(PlayerGameInfo.objects.filter(room_id=room.id))
                 print(number_of_seats)
+                if room.step is not None:
+                    continue
                 data.append({
                     "room_id": room.id,
                     "number_of_seats": number_of_seats,

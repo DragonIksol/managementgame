@@ -8,16 +8,22 @@
     <title>Авторизация</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
+<style>
+body {
+    background-image: url(/static/resources/images/registerBackground.jpg);
+    background-size: cover;
+}
+</style>
 <body>
     <center>
         <header>
-            <h1>
+            <h1 class="welcome-text">
                 Добро пожаловать в игру "Менеджмент"
             </h1>
         </header>
         <hr>
         <div class="vertical-content">
-            <h3>
+            <h3 class="instruction-text">
                 Для входа в систему введите логин и пароль
             </h3>
             <input id="login"
@@ -41,8 +47,8 @@
             >
             <span class="error-text" id="error-password" hidden>Неверно введенный пароль</span>
             <div>
-                <button class="custom-btn" id="registerBtn"><a href="registration/">Регистрация</a></button>
-                <button class="custom-btn" id="signUpBtn" disabled>Войти</button>
+                <button class="big-button" id="registerBtn"><a href="registration/">Регистрация</a></button>
+                <button class="big-button" id="signUpBtn" disabled>Войти</button>
             </div>
         </div>
     </center>

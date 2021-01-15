@@ -14,7 +14,6 @@ class Game {
 
     constructor() {
         this.loadGame();
-        this.initListeners();
     }
 
     async loadGame() {
@@ -42,6 +41,8 @@ class Game {
         this.minBuyESM = gameData.min_buy_esm;
         this.EGPBank = gameData.egp_bank;
         this.maxSellEGP = gameData.max_sell_egp;
+
+        this.initListeners();
     }
 
     async getPlayersData() {
@@ -71,7 +72,7 @@ class Game {
     initListeners() {
         const me = this,
             playerCard = me.playerCard,
-            surrenderBtn = this.shadowRoot.getElementById('surrenderBtn');
+            surrenderBtn = document.getElementById('surrenderBtn');
 
         playerCard.addEventListener('buyESMBtnClick', (e) => {
             const wnd = createEl('base-window', {

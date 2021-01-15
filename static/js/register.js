@@ -31,8 +31,8 @@ let createAvatarsList = () => {
             img.alt = index + 1;
 
             img.onclick = () => {
-                currentFocusAvatar && (currentFocusAvatar.style.outline = "none");
-                img.style.outline = "2px solid black";
+                currentFocusAvatar && (currentFocusAvatar.style.boxShadow = "none");
+                img.style.boxShadow = "0 0 20px white";
                 currentFocusAvatar = img;
                 setRegisterBtnDisabled();
             }
@@ -48,8 +48,8 @@ let createAvatarsList = () => {
 let avatars = document.querySelectorAll(".avatar");
 avatars.forEach((avatar) => {
     avatar.onclick = () => {
-        currentFocusAvatar && (currentFocusAvatar.style.outline = "none");
-        avatar.style.outline = "2px solid aquamarine";
+        currentFocusAvatar && (currentFocusAvatar.style.boxShadow = "none");
+        avatar.style.boxShadow = "0 0 10px white";
         currentFocusAvatar = avatar;
     }
 })
