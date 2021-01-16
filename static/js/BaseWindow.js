@@ -25,10 +25,12 @@ customElements.define('base-window',
                     display: flex;
                     justify-content: space-around;
                     align-items: center;
+                    margin: 0;
+                    padding: 0;
                 }
                 .window {
                     width: 50vw;
-                    height: 50vh;
+                    height: 75vh;
                     font-size: 14pt;
                     background-color: rgba(0, 0, 0, 1);
                     border-radius: 20px;

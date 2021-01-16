@@ -6,7 +6,6 @@ template.innerHTML = `
 <link rel="stylesheet" href="/static/css/game.css">
 <style>
 * {
-    color: black;
     margin: 0;
 }
 button {
@@ -39,7 +38,7 @@ button {
         </div>
     </div>
     <div class="horizontal-container">
-        <table border="1">
+        <table border="1" style="flex:9">
             <tr>
                 <th>Вид единицы</th>
                 <th>Количество</th>
@@ -100,11 +99,11 @@ customElements.define('player-card',
                 innerText: me.getAttribute('playerName')
             }));
             if (Number(window.USERID) === Number(me.getAttribute('id'))) {
-                this.shadowRoot.querySelector('.player-card').style.backgroundColor = 'rgb(200, 255, 200)';
+                this.shadowRoot.querySelector('.player-card').style.boxShadow = '0 0 20px rgb(75, 255, 75)';
                 this.shadowRoot.querySelector('.action-container').style.visibility = 'visible';
                 me.initButtonsEvents();
             } else {
-                this.shadowRoot.querySelector('.player-card').style.backgroundColor = 'rgb(255, 200, 200)';
+                this.shadowRoot.querySelector('.player-card').style.boxShadow = '0 0 20px rgb(255, 0, 0)';
             }
 
         }
@@ -141,9 +140,6 @@ customElements.define('player-card',
             };
             loanRequestBtn.onclick = () => {
                 this.dispatchEvent(new CustomEvent('loanRequestBtnClick'));
-            };
-            surrenderBtn.onclick = () => {
-                this.dispatchEvent(new CustomEvent('surrenderBtnClick'));
             };
         }
 
@@ -266,7 +262,7 @@ customElements.define('player-card',
         }
         set seniorPlayer(val) {
             this.#seniorPlayer = val;
-            this.shadowRoot.querySelector('.player-card').style.boxShadow = val ? '0 0 0 0.7vh gold' : 'none';
+            this.shadowRoot.querySelector('img').style.boxShadow = val ? '0 0 20px 0.7vh gold' : 'none';
         }
 
         get playerTurn() {

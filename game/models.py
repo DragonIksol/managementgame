@@ -59,7 +59,7 @@ class PlayerGameInfo(models.Model):
 
 class AutomatizationRequestList(models.Model):
     player_info_id = models.ForeignKey(to=PlayerGameInfo, on_delete=models.CASCADE, related_name='auto_player_id')
-    request_id = models.ForeignKey(to=BuildRequest, on_delete=models.CASCADE)
+    request_id = models.ForeignKey(to=AutomatizationRequest, on_delete=models.CASCADE)
 
     class Meta:
         constraints = [
@@ -69,7 +69,7 @@ class AutomatizationRequestList(models.Model):
 
 class BuildRequestList(models.Model):
     player_info_id = models.ForeignKey(to=PlayerGameInfo, on_delete=models.CASCADE, related_name='build_player_id')
-    request_id = models.ForeignKey(to=AutomatizationRequest, on_delete=models.CASCADE)
+    request_id = models.ForeignKey(to=BuildRequest, on_delete=models.CASCADE)
 
     class Meta:
         constraints = [

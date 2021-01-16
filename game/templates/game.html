@@ -11,6 +11,16 @@
     <script src="{% static '/js/BaseWindow.js' %}"></script>
     <script type="module" src="{% static '/js/PlayerCard.js' %}"></script>
 </head>
+<style>
+body {
+    background-image: url(/static/resources/images/gameBackground.jpg);
+    background-size: cover;
+    margin: 0
+}
+html {
+    margin: 0
+}
+</style>
 <body>
     <div class="main-container">
         <div class="game-cards-container">
@@ -22,40 +32,29 @@
                 ></player-card>
             {% endfor %}
         </div>
-        <div class="horizontal-container bottom-tools">
-            <div class="container flex-start">
-                <div class="horizontal-container">
-                    <b>Лог игры</b>
-                    <button id="surrenderBtn" class="red-button">Сдаться</button>
+        <div class="horizontal-container bottom-tools" style="width: 100%;justify-content: space-around">
+            <div class="flex-start" style="width:40%;margin-bottom:0">
+                <div class="horizontal-container no-margin">
+                    <b class="no-margin">Лог игры</b>
+                    <button id="surrenderBtn" class="red-button no-margin">Сдаться</button>
                 </div>
-                <textarea name="log" id="" cols="30" rows="10" readonly></textarea>
+                <textarea name="log" id="log" readonly></textarea>
             </div>
-            {% comment %} <div class="container flex-start">
-                <b>Действия</b>
-                <div>
-                    <button id="buyESMBtn" class="action-btn">Купить ЕСМ</button>
-                    <button id="sellEGPBtn" class="action-btn">Продать ЕГП</button>
-                    <button id="produceBtn" class="action-btn">Производство продукции</button>
-                    <button id="buildRequestBtn" class="action-btn">Заявка на строительство</button>
-                    <button id="automatizationRequestBtn" class="action-btn">Заявка на автоматизацию</button>
-                    <button id="loanRequestBtn" class="action-btn">Заявка на получение ссуды</button>
-                </div>
-            </div> {% endcomment %}
-            <div class="container flex-start">
+            <div class="container flex-start" style="margin-bottom:0">
                 <b>Банк</b>
-                <fieldset class="horizontal-container">
+                <fieldset class="horizontal-container no-padding">
                     <div>
                         <b>ЕГП:</b>
-                        <div>
-                            <button class="short-btn">Количество: <span id="EGPBank"></span></button>
-                            <button class="short-btn">Максимальная цена: <span id="maxSellEGP"></span></button>
+                        <div class="horizontal-container">
+                            <div class="bank-info">Количество: <span id="EGPBank"></span></div>
+                            <div class="bank-info">Максимальная цена: <span id="maxSellEGP"></span></div>
                         </div>
                     </div>
                     <div>
                         <b>ЕСМ:</b>
-                        <div>
-                            <button class="short-btn">Количество: <span id="ESMBank"></span></button>
-                            <button class="short-btn">Минимальная цена: <span id="minBuyESM"></span></button>
+                        <div class="horizontal-container">
+                            <div class="bank-info">Количество: <span id="ESMBank"></span></div>
+                            <div class="bank-info">Минимальная цена: <span id="minBuyESM"></span></div>
                         </div>
                     </div>
                 </fieldset>

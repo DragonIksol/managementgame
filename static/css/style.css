@@ -42,6 +42,7 @@ button:disabled {
 }
 button:active {
     background-color: rgb(0, 150, 150);
+    transition-duration: 0s;
 }
 button a {
     color: inherit;
@@ -74,10 +75,6 @@ button a {
 .vertical-content input {
     width: 200px;
     margin: 5px;
-}
-
-.container {
-    margin: 3px;
 }
 
 .horizontal-container {
@@ -186,6 +183,14 @@ input:not([type='checkbox']):not([type='radio']) {
     align-self: flex-start;
 }
 
+.no-margin {
+    margin: 0;
+}
+
+.no-padding {
+    padding: 0;
+}
+
 .red-button {
     background-color: red;
     color: white;
@@ -194,7 +199,17 @@ input:not([type='checkbox']):not([type='radio']) {
     outline: none;
     height: 21px;
     border-radius: 3px;
+    box-shadow: 0 0 10px 5px red;
+}
+.red-button:hover {
+    background-color: black;
+    color: red;
 }
 .red-button:active {
     background-color: brown;
+    color: black;
+}
+
+.inline {
+    display: inline-block;
 }

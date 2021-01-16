@@ -93,22 +93,22 @@ class Game {
                     </tr>
                 </table>
                 <div class="horizontal-container">Заявка</div>
-                <div>Введите количество ЕСМ</div>
-                <input type="number" min="0" max="${me.ESMBank}">
-                <div>Введите цену</div>
-                <input type="number" min="${me.minBuyESM}" max="${me.playerCard.capital}">
+                <input placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.ESMBank}">
+                <input placeholder="Введите цену" type="number" min="${me.minBuyESM}" max="${me.playerCard.capital}">
             `
             const bottomTools = wnd.querySelector('footer');
 
             bottomTools.append(
                 createEl('button', {
                     innerText: 'Назад',
+                    className: 'middle-button',
                     onclick: function () {
                         wnd.close();
                     }
                 }),
                 createEl('button', {
                     innerText: 'Отправить',
+                    className: 'middle-button',
                     onclick: function () {
                         console.log('Send');;
                     }
@@ -134,22 +134,22 @@ class Game {
                     </tr>
                 </table>
                 <div class="horizontal-container">Заявка</div>
-                <div>Введите количество ЕСМ</div>
-                <input type="number" min="0" max="${me.ESMBank}">
-                <div>Введите цену</div>
-                <input type="number" max="${me.maxSellEGP}" min="0">
+                <input placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.ESMBank}">
+                <input placeholder="Введите цену" type="number" max="${me.maxSellEGP}" min="0">
             `
             const bottomTools = wnd.querySelector('footer');
 
             bottomTools.append(
                 createEl('button', {
                     innerText: 'Назад',
+                    className: 'middle-button',
                     onclick: function () {
                         wnd.close();
                     }
                 }),
                 createEl('button', {
                     innerText: 'Отправить',
+                    className: 'middle-button',
                     onclick: function () {
                         console.log('Send');;
                     }
@@ -187,12 +187,14 @@ class Game {
             bottomTools.append(
                 createEl('button', {
                     innerText: 'Назад',
+                    className: 'middle-button',
                     onclick: function () {
                         wnd.close();
                     }
                 }),
                 createEl('button', {
                     innerText: 'Отправить',
+                    className: 'middle-button',
                     onclick: function () {
                         console.log('Send');;
                     }
@@ -216,12 +218,12 @@ class Game {
                     </tr>
                     <tr>
                         <td>Обычная</td>
-                        <td><input type="number" id="simpleFabricProduce" min="0" value="0"></td>
+                        <td><input placeholder="Введите количество ЕСМ" type="number" id="simpleFabricProduce" min="0" value="0"></td>
                         <td id="simpleProduceCost"></td>
                     </tr>
                     <tr>
                         <td>Автоматизированная</td>
-                        <td><input type="number" id="autoFabricProduce" min="0" value="0"></td>
+                        <td><input placeholder="Введите количество ЕСМ" type="number" id="autoFabricProduce" min="0" value="0"></td>
                         <td id="autoProduceCost"></td>
                     </tr>
                 </table>
@@ -230,6 +232,7 @@ class Game {
             const bottomTools = wnd.querySelector('footer'),
                 sendBtn = createEl('button', {
                     innerText: 'Отправить',
+                    className: 'middle-button',
                     onclick: function () {
                         console.log('Send');;
                     }
@@ -239,6 +242,7 @@ class Game {
             bottomTools.append(
                 createEl('button', {
                     innerText: 'Назад',
+                    className: 'middle-button',
                     onclick: function () {
                         wnd.close();
                     }
@@ -269,6 +273,99 @@ class Game {
                 calcAndValidate();
             };
         });
+
+        playerCard.addEventListener('automatizationRequestBtnClick',(e) => {
+            const wnd = createEl('base-window', {
+                winTitle: 'Заявка на автоматизацию фабрик'
+            })
+            document.body.appendChild(wnd);
+            const winContent = wnd.querySelector('#win-content');
+            winContent.innerHTML = `
+                <div>Количество доступных для автоматизации фабрик: ${me.playerCard.simpleFabrics}</div>
+                <hr>
+                <input id="fabricCountInput" type="number" placeholder="Введите количество фабрик">
+                <div>Стоимость автоматизации: <span id="autoCostSpan"></span></div>
+            `
+            const bottomTools = wnd.querySelector('footer');
+            const sendBtn = createEl('button', {
+                innerText: 'Отправить',
+                className: 'middle-button',
+                onclick: function () {
+                    console.log('Send');;
+                }
+            })
+
+            bottomTools.append(
+                createEl('button', {
+                    innerText: 'Назад',
+                    className: 'middle-button',
+                    onclick: function () {
+                        wnd.close();
+                    }
+                }),
+                sendBtn
+            );
+
+            const fabricCountInput = winContent.querySelector('#fabricCountInput'),
+                autoCostSpan = winContent.querySelector('#autoCostSpan');
+
+            fabricCountInput.oninput = () => {
+                const autoCost = fabricCountInput.valueAsNumber * 7000;
+                autoCostSpan.innerText = Number.isNaN(autoCost) ? '' : autoCost + '$';
+                sendBtn.disabled = autoCost > me.playerCard.capital;
+
+            }
+        });
+
+        playerCard.addEventListener('loanRequestBtnClick',(e) => {
+            const wnd = createEl('base-window', {
+                winTitle: 'Заявка на получение ссуды'
+            })
+            document.body.appendChild(wnd);
+            const winContent = wnd.querySelector('#win-content');
+            winContent.innerHTML = `
+                <div>Выберите сумму ссуды, которую хотите взять</div>
+                <div class="horizontal-container" style="justify-content: flex-start">
+                    <label class="big-label"for="loan5000">5000</label>
+                    <input class="big-input"id="loan5000" name="loan" type="radio" value="5000">
+                    <label class="big-label"for="loan10000">10000</label>
+                    <input class="big-input"id="loan10000" name="loan" type="radio" value="10000">
+                </div>
+            `
+            const bottomTools = wnd.querySelector('footer');
+            const sendBtn = createEl('button', {
+                innerText: 'Отправить',
+                className: 'middle-button',
+                onclick: function () {
+                    console.log('Send');;
+                }
+            })
+
+            bottomTools.append(
+                createEl('button', {
+                    innerText: 'Назад',
+                    className: 'middle-button',
+                    onclick: function () {
+                        wnd.close();
+                    }
+                }),
+                sendBtn
+            );
+
+            const fabricCountInput = winContent.querySelector('#fabricCountInput'),
+                autoCostSpan = winContent.querySelector('#autoCostSpan');
+
+            fabricCountInput.oninput = () => {
+                const autoCost = fabricCountInput.valueAsNumber * 7000;
+                autoCostSpan.innerText = Number.isNaN(autoCost) ? '' : autoCost + '$';
+                sendBtn.disabled = autoCost > me.playerCard.capital;
+
+            }
+        });
+
+        surrenderBtn.onclick = () => {
+            console.log('Surrender');
+        }
     }
 
     get playersCount() {
