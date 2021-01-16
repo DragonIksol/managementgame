@@ -409,7 +409,7 @@ class Game {
                 cost: cost,
                 game_id: window.GAME_ID
             })
-        });
+        });111111111111
         const obj = response.json();
     }
 
