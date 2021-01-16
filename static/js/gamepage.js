@@ -51,6 +51,15 @@ class Game {
         this.initListeners();
     }
 
+    correctInputIntValue(input, min, max) {
+        if (input.valueAsNumber > max) {
+            input.value = max;
+        } else if (input.valueAsNumber < min) {
+            input.value = min;
+        }
+        input.value = Math.floor(input.valueAsNumber);
+    }
+
     async getPlayersData() {
         const response = await fetch('players_data?' + new URLSearchParams({
             game_id: window.GAME_ID
@@ -100,10 +109,20 @@ class Game {
                     </tr>
                 </table>
                 <div class="horizontal-container">Заявка</div>
-                <input id="ESMCount" placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.ESMBank}">
-                <input id="cost" placeholder="Введите цену" type="number" min="${me.minBuyESM}" max="${me.playerCard.capital}">
+                <input id="ESMCountInput" placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.ESMBank}">
+                <input id="costInput" placeholder="Введите цену" type="number" min="${me.minBuyESM}" max="${me.playerCard.capital}">
             `
             const bottomTools = wnd.querySelector('footer');
+
+            const sendBtn = createEl('button', {
+                innerText: 'Отправить',
+                className: 'middle-button',
+                onclick: async () => {
+                    const ESMCount = winContent.querySelector('#ESMCountInput').valueAsNumber;
+                    const cost = winContent.querySelector('#costInput').valueAsNumber;
+                    await me.sendBuyESM(ESMCount, cost);
+                }
+            })
 
             bottomTools.append(
                 createEl('button', {
@@ -113,17 +132,24 @@ class Game {
                         wnd.close();
                     }
                 }),
-                createEl('button', {
-                    innerText: 'Отправить',
-                    className: 'middle-button',
-                    onclick: async () => {
-                        const ESMCount = winContent.querySelector('#ESMCount').valueAsNumber;
-                        const cost = winContent.querySelector('#cost').valueAsNumber;
-                        await me.sendBuyESM(ESMCount, cost);
-                    }
-                })
+                sendBtn
             )
+
+            const ESMCountInput = winContent.querySelector('#ESMCountInput'),
+                costInput = winContent.querySelector('#costInput');
+
+            const inputListenerHandler = () => {
+                sendBtn.disabled = ESMCountInput.valueAsNumber > me.ESMBank || (costInput.valueAsNumber * ESMCountInput.valueAsNumber) > me.playerCard.capital;
+            }
+
+            ESMCountInput.oninput = inputListenerHandler;
+            ESMCountInput.onchange = me.correctInputIntValue.bind(me, ESMCountInput, 0, me.ESMBank)
+            costInput.oninput = inputListenerHandler;
+            costInput.onchange = () => {
+                me.correctInputIntValue(costInput, me.minBuyESM, me.playerCard.capital/ESMCountInput.valueAsNumber)
+            };
         });
+
         playerCard.addEventListener('sellEGPBtnClick', (e) => {
             const wnd = createEl('base-window', {
                 winTitle: 'Заявка на ЕГП'
@@ -143,10 +169,20 @@ class Game {
                     </tr>
                 </table>
                 <div class="horizontal-container">Заявка</div>
-                <input id="EGPCount" placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.ESMBank}">
-                <input id="cost" placeholder="Введите цену" type="number" max="${me.maxSellEGP}" min="0">
+                <input id="EGPCountInput" placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.EGPBank}">
+                <input id="costInput" placeholder="Введите цену" type="number" max="${me.maxSellEGP}" min="0">
             `
             const bottomTools = wnd.querySelector('footer');
+
+            const sendBtn = createEl('button', {
+                innerText: 'Отправить',
+                className: 'middle-button',
+                onclick: async () => {
+                    const EGPCount = winContent.querySelector('#EGPCountInput').valueAsNumber;
+                    const cost = winContent.querySelector('#costInput').valueAsNumber;
+                    await me.sendSellEGP(EGPCount, cost);
+                }
+            })
 
             bottomTools.append(
                 createEl('button', {
@@ -156,16 +192,22 @@ class Game {
                         wnd.close();
                     }
                 }),
-                createEl('button', {
-                    innerText: 'Отправить',
-                    className: 'middle-button',
-                    onclick: async () => {
-                        const EGPCount = winContent.querySelector('#EGPCount').valueAsNumber;
-                        const cost = winContent.querySelector('#cost').valueAsNumber;
-                        await me.sendSellEGP(EGPCount, cost);
-                    }
-                })
-            )
+                sendBtn
+            );
+
+            const EGPCountInput = winContent.querySelector('#EGPCountInput'),
+                costInput = winContent.querySelector('#costInput');
+
+            const inputListenerHandler = () => {
+                sendBtn.disabled = EGPCountInput.valueAsNumber > me.EGPBank;
+            }
+
+            EGPCountInput.oninput = inputListenerHandler;
+            EGPCountInput.onchange = me.correctInputIntValue.bind(me, EGPCountInput, 0, me.EGPBank)
+            costInput.oninput = inputListenerHandler;
+            costInput.onchange = () => {
+                me.correctInputIntValue(costInput, 0, me.maxSellEGP)
+            };
         });
         playerCard.addEventListener('buildRequestBtnClick',(e) => {
             const wnd = createEl('base-window', {
@@ -194,6 +236,13 @@ class Game {
                 </table>
             `
             const bottomTools = wnd.querySelector('footer');
+            const sendBtn = createEl('button', {
+                innerText: 'Отправить',
+                className: 'middle-button',
+                onclick: function () {
+                    console.log('Send');;
+                }
+            });
 
             bottomTools.append(
                 createEl('button', {
@@ -203,14 +252,24 @@ class Game {
                         wnd.close();
                     }
                 }),
-                createEl('button', {
-                    innerText: 'Отправить',
-                    className: 'middle-button',
-                    onclick: function () {
-                        console.log('Send');;
-                    }
-                })
-            )
+                sendBtn
+            );
+
+            const simpleFabricBuildInput = winContent.querySelector('#simpleFabricBuildInput'),
+                autoFabricBuildInput = winContent.querySelector('#autoFabricBuildInput');
+
+            const inputListenerHandler = () => {
+                sendBtn.disabled = simpleFabricBuildInput.valueAsNumber + autoFabricBuildInput.valueAsNumber > me.playerCard.capital;
+            }
+
+            simpleFabricBuildInput.oninput = inputListenerHandler;
+            simpleFabricBuildInput.onchange = onchange = () => {
+                me.correctInputIntValue(simpleFabricBuildInput, 0, Math.floor((me.playerCard.capital - ((autoFabricBuildInput.valueAsNumber || 0) * 20000))/10000))
+            };
+            autoFabricBuildInput.oninput = inputListenerHandler;
+            autoFabricBuildInput.onchange = () => {
+                me.correctInputIntValue(autoFabricBuildInput, 0, Math.floor((me.playerCard.capital - ((simpleFabricBuildInput.valueAsNumber || 0) * 10000))/20000))
+            };
         });
 
         playerCard.addEventListener('produceBtnClick', (e) => {
@@ -320,12 +379,19 @@ class Game {
             const fabricCountInput = winContent.querySelector('#fabricCountInput'),
                 autoCostSpan = winContent.querySelector('#autoCostSpan');
 
-            fabricCountInput.oninput = () => {
+            const inputListenerHandler = () => {
                 const autoCost = fabricCountInput.valueAsNumber * 7000;
                 autoCostSpan.innerText = Number.isNaN(autoCost) ? '' : autoCost + '$';
                 sendBtn.disabled = autoCost > me.playerCard.capital;
-
             }
+
+            fabricCountInput.oninput = () => {
+                inputListenerHandler()
+            }
+            fabricCountInput.onchange = () => {
+                me.correctInputIntValue(fabricCountInput, 0, me.playerCard.capital / 7000);
+                inputListenerHandler()
+            };
         });
 
         playerCard.addEventListener('loanRequestBtnClick',(e) => {
@@ -338,7 +404,7 @@ class Game {
                 <div>Выберите сумму ссуды, которую хотите взять</div>
                 <div class="horizontal-container" style="justify-content: flex-start">
                     <label class="big-label"for="loan5000">5000</label>
-                    <input class="big-input"id="loan5000" name="loan" type="radio" value="5000">
+                    <input class="big-input"id="loan5000" name="loan" type="radio" value="5000" checked>
                     <label class="big-label"for="loan10000">10000</label>
                     <input class="big-input"id="loan10000" name="loan" type="radio" value="10000">
                 </div>
@@ -362,16 +428,6 @@ class Game {
                 }),
                 sendBtn
             );
-
-            const fabricCountInput = winContent.querySelector('#fabricCountInput'),
-                autoCostSpan = winContent.querySelector('#autoCostSpan');
-
-            fabricCountInput.oninput = () => {
-                const autoCost = fabricCountInput.valueAsNumber * 7000;
-                autoCostSpan.innerText = Number.isNaN(autoCost) ? '' : autoCost + '$';
-                sendBtn.disabled = autoCost > me.playerCard.capital;
-
-            }
         });
 
         surrenderBtn.onclick = async () => {
@@ -409,7 +465,7 @@ class Game {
                 cost: cost,
                 game_id: window.GAME_ID
             })
-        });111111111111
+        });
         const obj = response.json();
     }
 
