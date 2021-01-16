@@ -51,6 +51,15 @@ class Game {
         this.initListeners();
     }
 
+    correctInputIntValue(input, min, max) {
+        if (input.valueAsNumber > max) {
+            input.value = max;
+        } else if (input.valueAsNumber < min) {
+            input.value = min;
+        }
+        input.value = Math.floor(input.valueAsNumber);
+    }
+
     async getPlayersData() {
         const response = await fetch('players_data?' + new URLSearchParams({
             game_id: window.GAME_ID
@@ -100,10 +109,20 @@ class Game {
                     </tr>
                 </table>
                 <div class="horizontal-container">Заявка</div>
-                <input id="ESMCount" placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.ESMBank}">
-                <input id="cost" placeholder="Введите цену" type="number" min="${me.minBuyESM}" max="${me.playerCard.capital}">
+                <input id="ESMCountInput" placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.ESMBank}">
+                <input id="costInput" placeholder="Введите цену" type="number" min="${me.minBuyESM}" max="${me.playerCard.capital}">
             `
             const bottomTools = wnd.querySelector('footer');
+
+            const sendBtn = createEl('button', {
+                innerText: 'Отправить',
+                className: 'middle-button',
+                onclick: async () => {
+                    const ESMCount = winContent.querySelector('#ESMCount').valueAsNumber;
+                    const cost = winContent.querySelector('#cost').valueAsNumber;
+                    await me.sendBuyESM(ESMCount, cost);
+                }
+            })
 
             bottomTools.append(
                 createEl('button', {
@@ -113,16 +132,22 @@ class Game {
                         wnd.close();
                     }
                 }),
-                createEl('button', {
-                    innerText: 'Отправить',
-                    className: 'middle-button',
-                    onclick: async () => {
-                        const ESMCount = winContent.querySelector('#ESMCount').valueAsNumber;
-                        const cost = winContent.querySelector('#cost').valueAsNumber;
-                        await me.sendBuyESM(ESMCount, cost);
-                    }
-                })
+                sendBtn
             )
+
+            const ESMCountInput = winContent.querySelector('#ESMCountInput'),
+                costInput = winContent.querySelector('#costInput');
+
+            const inputListenerHandler = () => {
+                me.correctInputIntValue(ESMCountInput, 0, me.ESMBank);
+                me.correctInputIntValue(costInput, me.minBuyESM, me.playerCard.capital);
+
+                sendBtn.disabled = (costInput.valueAsNumber * ESMCountInput.valueAsNumber) > me.playerCard.capital;
+            }
+
+            ESMCountInput.oninput = inputListenerHandler;
+            ESMCountInput.onchange =
+            costInput.oninput = inputListenerHandler;
         });
         playerCard.addEventListener('sellEGPBtnClick', (e) => {
             const wnd = createEl('base-window', {
