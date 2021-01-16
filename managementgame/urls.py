@@ -25,5 +25,6 @@ urlpatterns = [
     path('avatars/', AvatarsView.as_view()),
     path('game/', include('game.urls')),
     # path('accounts/', include('django.contrib.auth.urls')),
-    path('', include('mainpage.urls'), name='mainpage')
+    path('', include('mainpage.urls'), name='mainpage'),
+    # path('sys_info/', include())
 ]

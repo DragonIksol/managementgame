@@ -225,7 +225,7 @@ input:not([type='checkbox']):not([type='radio']) {
     color: green;
 }
 .green-button:active {
-    background-color: brown;
+    background-color: darkgreen;
     color: black;
 }
 

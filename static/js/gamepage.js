@@ -17,8 +17,9 @@ class Game {
     }
 
     async loadGame() {
-        const me = this;
-        const playersData = await this.getPlayersData();
+        const me = this,
+            playersData = await this.getPlayersData(),
+            finalTurnBtn = document.getElementById('finalTurnBtn');
         playersData.forEach(el => {
             const playerCard = document.getElementById(el.player_id);
             playerCard.capital = el.capital;
@@ -35,6 +36,7 @@ class Game {
                 me.playerCard = playerCard;
 
                 playerCard.setDisabledActions(!playerCard.playerTurn);
+                finalTurnBtn.disabled = !playerCard.playerTurn;
             }
         });
         const gameData = await this.getGameData();
@@ -386,7 +388,7 @@ class Game {
             method: 'post',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
-                },
+            },
             body: JSON.stringify({
                 esm_count: ESMCount,
                 cost: cost,
@@ -396,14 +398,14 @@ class Game {
         const obj = response.json();
     }
 
-    async sendSellEGP(ESMCount, cost) {
+    async sendSellEGP(EGPCount, cost) {
         const response = await fetch('sellEGP', {
             method: 'post',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
-                },
+            },
             body: JSON.stringify({
-                esm_count: ESMCount,
+                egp_count: EGPCount,
                 cost: cost,
                 game_id: window.GAME_ID
             })
@@ -416,7 +418,7 @@ class Game {
             method: 'post',
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
-                },
+            },
             body: JSON.stringify({
                 game_id: window.GAME_ID
             })

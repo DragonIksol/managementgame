@@ -96,7 +96,7 @@ class GameDataView(View):
             'data': data
         })
 
-
+#TODO
 class BuyESMView(View):
 
     def post(self, request, *args, **kwargs):
@@ -113,17 +113,30 @@ class BuyESMView(View):
             'error': error
         })
 
-
+#TODO
 class SellEGPView(View):
 
     def post(self, request, *args, **kwargs):
         params = json.loads(request.body)
-        esm_count = params.get('esm_count')
+        egp_count = params.get('egp_count')
         cost = params.get('cost')
         game_id = params.get('game_id')
         error = None
 
-        print(esm_count, cost, game_id)
+        print(egp_count, cost, game_id)
+
+        return JsonResponse({
+            'success': not error,
+            'error': error
+        })
+
+#TODO
+class FinalTurnView(View):
+    def post(self, request, *args, **kwargs):
+        params = json.loads(request.body)
+        game_id = params.get('game_id')
+        error = None
+        print(game_id)
 
         return JsonResponse({
             'success': not error,
