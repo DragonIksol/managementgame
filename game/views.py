@@ -96,7 +96,7 @@ class GameDataView(View):
             'data': data
         })
 
-#TODO
+#TODO купить ЕСМ
 class BuyESMView(View):
 
     def post(self, request, *args, **kwargs):
@@ -113,7 +113,7 @@ class BuyESMView(View):
             'error': error
         })
 
-#TODO
+#TODO продать ЕГП
 class SellEGPView(View):
 
     def post(self, request, *args, **kwargs):
