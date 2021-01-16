@@ -210,6 +210,25 @@ input:not([type='checkbox']):not([type='radio']) {
     color: black;
 }
 
+.green-button {
+    background-color: green;
+    color: white;
+    font-weight: bold;
+    border: none;
+    outline: none;
+    height: 21px;
+    border-radius: 3px;
+    box-shadow: 0 0 10px 5px green;
+}
+.green-button:hover {
+    background-color: black;
+    color: green;
+}
+.green-button:active {
+    background-color: brown;
+    color: black;
+}
+
 .inline {
     display: inline-block;
 }

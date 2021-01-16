@@ -31,7 +31,11 @@ class Game {
             playerCard.buildFabrics = el.build_fabrics;
             playerCard.playerTurn = el.player_turn
 
-            if (window.USERID === el.player_id) me.playerCard = playerCard;
+            if (window.USERID === el.player_id) {
+                me.playerCard = playerCard;
+
+                playerCard.setDisabledActions(!playerCard.playerTurn);
+            }
         });
         const gameData = await this.getGameData();
         this.playersCount = gameData.players_count;
@@ -72,7 +76,8 @@ class Game {
     initListeners() {
         const me = this,
             playerCard = me.playerCard,
-            surrenderBtn = document.getElementById('surrenderBtn');
+            surrenderBtn = document.getElementById('surrenderBtn'),
+            finalTurnBtn = document.getElementById('finalTurnBtn');
 
         playerCard.addEventListener('buyESMBtnClick', (e) => {
             const wnd = createEl('base-window', {
@@ -93,8 +98,8 @@ class Game {
                     </tr>
                 </table>
                 <div class="horizontal-container">Заявка</div>
-                <input placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.ESMBank}">
-                <input placeholder="Введите цену" type="number" min="${me.minBuyESM}" max="${me.playerCard.capital}">
+                <input id="ESMCount" placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.ESMBank}">
+                <input id="cost" placeholder="Введите цену" type="number" min="${me.minBuyESM}" max="${me.playerCard.capital}">
             `
             const bottomTools = wnd.querySelector('footer');
 
@@ -109,8 +114,10 @@ class Game {
                 createEl('button', {
                     innerText: 'Отправить',
                     className: 'middle-button',
-                    onclick: function () {
-                        console.log('Send');;
+                    onclick: async () => {
+                        const ESMCount = winContent.querySelector('#ESMCount').valueAsNumber;
+                        const cost = winContent.querySelector('#cost').valueAsNumber;
+                        await me.sendBuyESM(ESMCount, cost);
                     }
                 })
             )
@@ -134,8 +141,8 @@ class Game {
                     </tr>
                 </table>
                 <div class="horizontal-container">Заявка</div>
-                <input placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.ESMBank}">
-                <input placeholder="Введите цену" type="number" max="${me.maxSellEGP}" min="0">
+                <input id="EGPCount" placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.ESMBank}">
+                <input id="cost" placeholder="Введите цену" type="number" max="${me.maxSellEGP}" min="0">
             `
             const bottomTools = wnd.querySelector('footer');
 
@@ -150,8 +157,10 @@ class Game {
                 createEl('button', {
                     innerText: 'Отправить',
                     className: 'middle-button',
-                    onclick: function () {
-                        console.log('Send');;
+                    onclick: async () => {
+                        const EGPCount = winContent.querySelector('#EGPCount').valueAsNumber;
+                        const cost = winContent.querySelector('#cost').valueAsNumber;
+                        await me.sendSellEGP(EGPCount, cost);
                     }
                 })
             )
@@ -363,9 +372,56 @@ class Game {
             }
         });
 
-        surrenderBtn.onclick = () => {
+        surrenderBtn.onclick = async () => {
             console.log('Surrender');
         }
+
+        finalTurnBtn.onclick = async () => {
+            await me.finalTurn()
+        }
+    }
+
+    async sendBuyESM(ESMCount, cost) {
+        const response = await fetch('buyESM', {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+                },
+            body: JSON.stringify({
+                esm_count: ESMCount,
+                cost: cost,
+                game_id: window.GAME_ID
+            })
+        });
+        const obj = response.json();
+    }
+
+    async sendSellEGP(ESMCount, cost) {
+        const response = await fetch('sellEGP', {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+                },
+            body: JSON.stringify({
+                esm_count: ESMCount,
+                cost: cost,
+                game_id: window.GAME_ID
+            })
+        });
+        const obj = response.json();
+    }
+
+    async finalTurn() {
+        const response = await fetch('finalTurn', {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+                },
+            body: JSON.stringify({
+                game_id: window.GAME_ID
+            })
+        });
+        const obj = response.json();
     }
 
     get playersCount() {

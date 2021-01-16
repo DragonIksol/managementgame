@@ -143,6 +143,14 @@ customElements.define('player-card',
             };
         }
 
+        setDisabledActions(val) {
+            this.shadowRoot.querySelector('.action-container').childNodes.forEach((el) => {
+                if (el instanceof HTMLButtonElement) {
+                    el.disabled = val;
+                }
+            })
+        }
+
         get EGP() {
             return this.#EGP;
         }

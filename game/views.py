@@ -1,3 +1,4 @@
+import json
 import math
 
 from utils.utils import *
@@ -82,6 +83,7 @@ class GameDataView(View):
         data.update({
             'id': game.id,
             'players_count': game.players_count,
+            'current_player_turn': get_current_player(game_id).id,
             'step': game.step,
             'level': game.level,
             'esm_bank': math.floor(costs_by_level_map[game.level][0] * game.players_count),
@@ -92,4 +94,38 @@ class GameDataView(View):
 
         return JsonResponse({
             'data': data
+        })
+
+
+class BuyESMView(View):
+
+    def post(self, request, *args, **kwargs):
+        params = json.loads(request.body)
+        esm_count = params.get('esm_count')
+        cost = params.get('cost')
+        game_id = params.get('game_id')
+        error = None
+
+        print(esm_count, cost, game_id)
+
+        return JsonResponse({
+            'success': not error,
+            'error': error
+        })
+
+
+class SellEGPView(View):
+
+    def post(self, request, *args, **kwargs):
+        params = json.loads(request.body)
+        esm_count = params.get('esm_count')
+        cost = params.get('cost')
+        game_id = params.get('game_id')
+        error = None
+
+        print(esm_count, cost, game_id)
+
+        return JsonResponse({
+            'success': not error,
+            'error': error
         })
