@@ -180,11 +180,14 @@ class StartGame(View):
             room.level = 3
             room.game_stage = 1
             players_info = PlayerGameInfo.objects.filter(room_id=room.id)
+            senioring = 0
             for player in players_info:
                 player.capital = 10000
                 player.esm = 4
                 player.egp = 2
                 player.simple_fabric_count = 2
+                player.senioring = senioring
+                senioring += 1
                 if player.player_id.id == request.user.id:
                     player.senior_player = True
 

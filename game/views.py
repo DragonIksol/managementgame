@@ -128,6 +128,8 @@ class SurrenderView(View):
         error = None
         try:
             player = PlayerGameInfo.objects.get(room_id=game_id, player_id=request.user.id)
+            player.esm_request_id and player.esm_request_id.delete()
+            player.egp_request_id and player.egp_request_id.delete()
             player.delete()
             room = Game.objects.get(id=game_id)
             room.players_count = room.players_count - 1
@@ -209,12 +211,13 @@ class BuyESMView(View):
         player = PlayerGameInfo.objects.get(player_id=request.user.id, room_id=game_id)
         esm_request = ESMRequest(esm_count=esm_count, esm_price=cost)
         esm_request.save()
-        player.esm_request_id = esm_request.id
+        player.esm_request_id = esm_request
         player.player_turn_finish = True
         player.save()
 
         if check_turn_finish(game_id):
             self.bank_ESM_bargaining(game_id)
+            end_turn(game_id)
 
         return JsonResponse({
             'success': not error,
@@ -227,29 +230,31 @@ class BuyESMView(View):
         players = PlayerGameInfo.objects.filter(room_id=game_id)
         esm_s = []
         for player in players:
-            esm_s.append(ESMRequest.objects.get(id=player.esm_request_id))
+            esm_s.append(ESMRequest.objects.get(id=player.esm_request_id.id))
         self.choose_interested_esm_request(esm_s)
         return
 
     def choose_interested_esm_request(self, esm_s):
         esm_s_price_mass = [x.esm_price for x in esm_s]
         max_price_esm = max(esm_s_price_mass)
-        esm_request_mass = ESMRequest.objects.filter(esm_price=max_price_esm).exclude(bank_response=True)
-        while (self.esm_count != 0 or esm_request_mass):
+        while ((self.esm_count != 0)):
+            esm_request_mass = ESMRequest.objects.filter(esm_price=max_price_esm).exclude(bank_response=True)
+            if not esm_request_mass:
+                break
             players = []
             for esm_request in esm_request_mass:
                 players.append(PlayerGameInfo.objects.get(
                     esm_request_id=esm_request.id))
+
             self.choose_seniors_esm_request(players)
-        return
 
     def choose_seniors_esm_request(self, players):
+        # if players:
         players_senior = [x.senioring for x in players]
         min_senior_rang = min(players_senior)
         player_with_true_respon = PlayerGameInfo.objects.get(senioring=min_senior_rang)
-        esm_request = ESMRequest.objects.get(id=player_with_true_respon.esm_request_id)
+        esm_request = ESMRequest.objects.get(id=player_with_true_respon.esm_request_id.id)
         self.subtraction_of_bids(esm_request)
-        return
 
     def subtraction_of_bids(self, esm_request):
         if self.esm_count >= esm_request.esm_count:
@@ -258,16 +263,17 @@ class BuyESMView(View):
         else:
             self.subtraction_capital_of_buy(self.esm_count, esm_request.esm_price, esm_request)
             self.esm_count = 0
-        return
 
     # подсчет капитала после продажи
     def subtraction_capital_of_buy(self, esm_count, esm_price, esm_request):
-        player = PlayerGameInfo.objects.get(egp_request_id=esm_request.id)
-        player.capital = player.capital + esm_count * esm_price
+        print(esm_request.id)
+        player = PlayerGameInfo.objects.get(esm_request_id=esm_request.id)
+        print(player.capital)
+        print(esm_count)
+        player.capital = player.capital - esm_count * esm_price
+        player.esm = player.esm + esm_count
         player.save()
-        esm_request.bank_response = True
-        esm_request.save()
-        return
+        esm_request.delete()
 
 # TODO продать ЕГП
 # Продажа ЕГП-Вова
@@ -284,12 +290,13 @@ class SellEGPView(View):
         player = PlayerGameInfo.objects.get(player_id=request.user.id, room_id=game_id)
         egp_request = EGPRequest(egp_count=egp_count, egp_price=cost)
         egp_request.save()
-        player.esm_request_id = egp_request.id
+        player.esm_request_id = egp_request
         player.player_turn_finish = True
         player.save()
 
         if check_turn_finish(game_id):
             self.bank_EGP_bargaining(game_id)
+            end_turn(game_id)
 
         return JsonResponse({
             'success': not error,
@@ -302,7 +309,7 @@ class SellEGPView(View):
         players = PlayerGameInfo.objects.filter(room_id=game_id)
         egp_s = []
         for player in players:
-            egp_s.append(EGPRequest.objects.get(id=player.egp_request_id))
+            egp_s.append(EGPRequest.objects.get(id=player.egp_request_id.id))
         self.choose_interested_request(egp_s)
         return
 
@@ -311,7 +318,7 @@ class SellEGPView(View):
         egp_s_price_mass = [x.egp_price for x in egp_s]
         min_price_egp = min(egp_s_price_mass)
         egp_request_mass = EGPRequest.objects.filter(egp_price=min_price_egp).exclude(bank_response=True)
-        while (self.egp_count != 0 or egp_request_mass):
+        while ((self.egp_count != 0) and egp_request_mass):
             players = []
             for egp_request in egp_request_mass:
                 players.append(PlayerGameInfo.objects.get(
@@ -324,7 +331,7 @@ class SellEGPView(View):
         players_senior = [x.senioring for x in players]
         min_senior_rang = min(players_senior)
         player_with_true_respon = PlayerGameInfo.objects.get(senioring=min_senior_rang)
-        egp_request = EGPRequest.objects.get(id=player_with_true_respon.egp_request_id)
+        egp_request = EGPRequest.objects.get(id=player_with_true_respon.egp_request_id.id)
         self.minus_ebuchai_zaiavka(egp_request)
         return
 
@@ -342,6 +349,7 @@ class SellEGPView(View):
     def add_capital_of_sold(self, egp_count, egp_price, egp_request):
         player = PlayerGameInfo.objects.get(egp_request_id=egp_request.id)
         player.capital = player.capital + egp_count * egp_price
+        player.egp = player.egp + egp_count
         player.save()
         egp_request.bank_response = True
         egp_request.save()

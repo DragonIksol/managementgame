@@ -161,7 +161,7 @@ class Game {
                 onclick: async () => {
                     const ESMCount = winContent.querySelector('#ESMCountInput').valueAsNumber;
                     const cost = winContent.querySelector('#costInput').valueAsNumber;
-                    await me.sendBuyESM(ESMCount, cost);
+                    await me.sendBuyESM(wnd, ESMCount, cost);
                 }
             })
 
@@ -518,7 +518,7 @@ class Game {
         }
     }
 
-    async sendBuyESM(ESMCount, cost) {
+    async sendBuyESM(wnd, ESMCount, cost) {
         const response = await fetch('buyESM', {
             method: 'post',
             headers: {
@@ -530,10 +530,13 @@ class Game {
                 game_id: window.GAME_ID
             })
         });
-        const obj = response.json();
+        const obj = await response.json();
+        if (obj.success) {
+            wnd.close();
+        }
     }
 
-    async sendProduceBtn(simpleFabricProduce, autoFabricProduce) {
+    async sendProduceBtn(wnd, simpleFabricProduce, autoFabricProduce) {
         const response = await fetch('produceEGP', {
             method: 'post',
             headers: {
@@ -548,7 +551,7 @@ class Game {
         const obj = response.json();
     }
 
-    async sendSellEGP(EGPCount, cost) {
+    async sendSellEGP(wnd, EGPCount, cost) {
         const response = await fetch('sellEGP', {
             method: 'post',
             headers: {
