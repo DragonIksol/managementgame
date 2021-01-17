@@ -155,6 +155,9 @@ class FinalTurnView(View):
         player.player_turn_finish = True
         player.save()
 
+        if check_turn_finish(game_id):
+            end_turn(game_id)
+
         return JsonResponse({
             'success': not error,
             'error': error
@@ -167,29 +170,23 @@ class FinalTurnView(View):
 class ProduceEGPView(View):
     def post(self, request, *args, **kwargs):
         params = json.loads(request.body)
-        esm_count = params.get('esm_count')
-        cost = params.get('cost')
+        simple_fabric_produce = params.get('simple_fabric_produce')
+        auto_fabric_produce = params.get('auto_fabric_produce')
         game_id = params.get('game_id')
         error = None
 
+        simple_cost = simple_fabric_produce * 2000
+        auto_cost = math.floor(auto_fabric_produce / 2) * 3000 + (auto_fabric_produce % 2) * 2000
+
         try:
             player = PlayerGameInfo.objects.get(player_id=request.user.id, room_id=game_id)
-            esm_request = ESMRequest(esm_count=esm_count, esm_price=cost)
-            esm_request.save()
-            player.esm_request_id = esm_request.id
+            player.esm_produce = simple_fabric_produce + auto_fabric_produce
             player.player_turn_finish = True
+            player.capital = player.capital - simple_cost - auto_cost
             player.save()
 
-            all_finish = True
-            all_players = PlayerGameInfo.objects.filter(room_id=game_id)
-            for player in all_players:
-                if not player.player_turn_finish:
-                    all_finish = False
-                    break
-
-            if all_finish:
-                # завершить стадию
-                pass
+            if check_turn_finish(game_id):
+                end_turn(game_id)
 
         except BaseException as err:
             print(err)
@@ -266,10 +263,10 @@ class BuyESMView(View):
             self.esm_count = 0
         return
 
-        # подсчет капитала после покупки
+    # подсчет капитала после продажи
     def subtraction_capital_of_buy(self, esm_count, esm_price, esm_request):
-        player = PlayerGameInfo.objects.get(esm_request_id=esm_request.id)
-        player.capital = player.capital - esm_count * esm_price
+        player = PlayerGameInfo.objects.get(egp_request_id=esm_request.id)
+        player.capital = player.capital + esm_count * esm_price
         player.save()
         esm_request.bank_response = True
         esm_request.save()
