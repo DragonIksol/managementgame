@@ -12,6 +12,7 @@ from django import template
 
 register = template.Library()
 
+
 # Create your views here.
 class GameView(TemplateView):
     template_name = 'game.html'
@@ -139,7 +140,8 @@ class SurrenderView(View):
             'error': error
         })
 
-#TODO
+
+# TODO
 class FinalTurnView(View):
     def post(self, request, *args, **kwargs):
         params = json.loads(request.body)
@@ -155,7 +157,8 @@ class FinalTurnView(View):
             'error': error
         })
 
-#TODO купить ЕСМ
+
+# TODO купить ЕСМ
 class BuyESMView(View):
 
     def post(self, request, *args, **kwargs):
@@ -180,7 +183,9 @@ class BuyESMView(View):
             'error': error
         })
 
-#TODO продать ЕГП
+
+# TODO продать ЕГП
+# Продажа ЕГП-Вова
 class SellEGPView(View):
 
     def post(self, request, *args, **kwargs):
@@ -189,10 +194,42 @@ class SellEGPView(View):
         cost = params.get('cost')
         game_id = params.get('game_id')
         error = None
-
         print(egp_count, cost, game_id)
+        # сохранение заявки
+        player = PlayerGameInfo.objects.get(player_id=request.user.id, room_id=game_id)
+        egp_request = EGPRequest(egp_count=egp_count, egp_price=cost)
+        egp_request.save()
+        player.esm_request_id = egp_request.id
+        player.player_turn_finish = True
+        player.save()
+
+        if check_turn_finish(game_id):
+            self.bank_EGP_bargaining(game_id)
 
         return JsonResponse({
             'success': not error,
             'error': error
         })
+
+    def bank_EGP_bargaining(self, game_id):
+        players = PlayerGameInfo.objects.filter(room_id=game_id)
+        egp_s = []
+        for player in players:
+            egp_s.append(EGPRequest.objects.get(id=player.egp_request_id))
+        self.choose_interested_request(egp_s)
+        return
+
+    # здесь формируются списки игроков с самым интересным предложением для банка
+    def choose_interested_request(self, egp_s):
+        egp_s_price_mass = [x.egp_price for x in egp_s]
+        min_price_egp = min(egp_s_price_mass)
+        egp_request_mass = EGPRequest.objects.filter(egp_price=min_price_egp)
+        players = []
+        for egp_request in egp_request_mass:
+            players.append(PlayerGameInfo.objects.filter(
+                egp_request_id=egp_request.id))
+        self.choose_seniors_request(players)
+        return
+
+    # здесь формируются списки игроки чьи заявки по старшинству важнее
+    def choose_seniors_request(self,players):

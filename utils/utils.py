@@ -4,22 +4,23 @@ import random
 from game.models import *
 
 costs_by_level_map = {
-# level: [esm, min_buy_esm, egp, max_sell_egp]
-    1: [1,   800, 3,   6500],
+    # level: [esm, min_buy_esm, egp, max_sell_egp]
+    1: [1, 800, 3, 6500],
     2: [1.5, 650, 2.5, 6000],
-    3: [2,   500, 2,   5500],
+    3: [2, 500, 2, 5500],
     4: [2.5, 400, 1.5, 5000],
-    5: [3,   300, 1,   4500]
+    5: [3, 300, 1, 4500]
 }
 
 next_level_chance_map = {
-#old_lvl: [lvl1, lvl2, lvl3, lvl4, lvl5] при умножении на 12
+    # old_lvl: [lvl1, lvl2, lvl3, lvl4, lvl5] при умножении на 12
     1: [4, 4, 2, 1, 1],
     2: [3, 4, 3, 1, 1],
     3: [1, 3, 4, 3, 1],
     4: [1, 1, 3, 4, 3],
     5: [1, 1, 2, 4, 4],
 }
+
 
 def get_current_player(game_id):
     game = Game.objects.get(id=game_id)
@@ -30,8 +31,10 @@ def get_current_player(game_id):
     cur_player_index = (step - 1 + senior_index) % players_count
     return players[cur_player_index]
 
+
 def get_game_month(game_id):
     return 1
+
 
 def get_senior_player(game_id):
     # game = Game.objects.get(id=game_id)
@@ -59,3 +62,14 @@ def get_next_level(game_id):
             break
 
     return next_level
+
+#проверяет закончили ли свой этап все игроки
+def check_turn_finish(game_id):
+    players = PlayerGameInfo.objects.filter(room_id=game_id)
+    player_wil = True
+    for player in players:
+        player_wil = player_wil and player.player_turn_finish
+    return player_wil
+
+
+
