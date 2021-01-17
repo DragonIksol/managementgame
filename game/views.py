@@ -285,3 +285,4 @@ class SellEGPView(View):
 
     # здесь формируются списки игроки чьи заявки по старшинству важнее
     def choose_seniors_request(self,players):
+        pass

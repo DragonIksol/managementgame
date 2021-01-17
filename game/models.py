@@ -58,6 +58,7 @@ class PlayerGameInfo(models.Model):
     esm = models.IntegerField(null=True, blank=True)
     egp = models.IntegerField(null=True, blank=True)
     senior_player = models.BooleanField(null=True, default=False)
+    senioring = models.SmallIntegerField(null=True, blank=True)
     player_turn_finish = models.BooleanField(null=True, default=False)
     esm_request_id = models.ForeignKey(ESMRequest, null=True, blank=True, on_delete=models.SET_NULL)
     egp_request_id = models.ForeignKey(EGPRequest, null=True, blank=True, on_delete=models.SET_NULL)
