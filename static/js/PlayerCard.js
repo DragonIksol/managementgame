@@ -37,7 +37,7 @@ button {
         </div>
     </div>
     <div class="horizontal-container">
-        <table border="1" style="flex:9">
+        <table hidden border="1" style="flex:9">
             <tr>
                 <th>Вид единицы</th>
                 <th>Количество</th>

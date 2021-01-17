@@ -430,10 +430,14 @@ class BuildAutomatizationRequestView(View):
         build_request_list = BuildRequestList(player_info_id=player, request_id=build_request)
         build_request_list.save()
 
+        player.capital = player.capital - ((simple_build or 0 * 10000) + (auto_build or 0 * 2000))
+
         automatization_request = AutomatizationRequest(step=game.step, count=automatization)
         automatization_request.save()
         automatization_request_list = AutomatizationRequestList(player_info_id=player, request_id=automatization_request)
         automatization_request_list.save()
+
+        player.capital = player.capital - (automatization or 0 * 7000)
 
         player.player_turn_finish = True
         player.save()
