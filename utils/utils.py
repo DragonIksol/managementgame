@@ -123,6 +123,27 @@ def end_turn(game_id):
     game.save()
     for player in players:
         player.player_turn_finish = False
+        if player.capital < 0:
+            # player = PlayerGameInfo.objects.get(room_id=game_id, player_id=request.user.id)
+            player.esm_request_id and player.esm_request_id.delete()
+            player.egp_request_id and player.egp_request_id.delete()
+            player.loan_id and player.loan_id.delete()
+            build_request_list = BuildRequestList.objects.filter(player_info_id=player.id)
+            for request in build_request_list:
+                build_request = BuildRequest.objects.get(id=request.request_id_id)
+                build_request.delete()
+            auto_request_list = AutomatizationRequestList.objects.filter(player_info_id=player.id)
+            for request in auto_request_list:
+                auto_request = AutomatizationRequest.objects.get(id=request.request_id_id)
+                auto_request.delete()
+
+            player.delete()
+            room = Game.objects.get(id=game_id)
+            room.players_count = room.players_count - 1
+            if room.players_count == 0:
+                room.delete()
+            else:
+                room.save()
         player.save()
 
 

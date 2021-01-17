@@ -368,6 +368,7 @@ class SellEGPView(View):
         else:
             self.add_capital_of_sold(self.egp_count, egp_request.egp_price, egp_request)
             self.egp_count = 0
+            self.egp_count = 0
 
     #подсчет капитала после продажи
     def add_capital_of_sold(self, egp_count, egp_price, egp_request):
