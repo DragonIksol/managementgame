@@ -1,6 +1,8 @@
 import math
 import random
 
+from django.http.response import JsonResponse
+
 from game.models import *
 
 costs_by_level_map = {
@@ -113,7 +115,7 @@ def post(self, request, *args, **kwargs):
     player.loan_id = loanp.id
     player.player_turn_finish = True
     player.save()
-     return JsonResponse({
-        'success': not error,
-        'error': error
-     })
+    return JsonResponse({
+    'success': not error,
+    'error': error
+    })
