@@ -12,5 +12,7 @@ urlpatterns = [
     path('finalTurn', FinalTurnView.as_view()),
     path('surrender', SurrenderView.as_view()),
     path('produceEGP', ProduceEGPView.as_view()),
-    path('sellEGP', SellEGPView.as_view())
+    path('sellEGP', SellEGPView.as_view()),
+    path('loan', SellEGPView.as_view()),
+    path('build_automatization_request', BuildAutomatizationRequestView.as_view())
 ]
