@@ -356,7 +356,25 @@ class SellEGPView(View):
         return
 
 
+class LoanView(View):
+    def post(self, request, *args, **kwargs):
+        params = json.loads(request.body)
+        loan = params.get('loan')
+        game_id = params.get('game_id')
+        error = None
+        player = PlayerGameInfo.objects.get(player_id=request.user.id, room_id=game_id)
+        loanp = Loan(loan_amount=loan, loan_date=Game.objects.get(id=game_id).step)
+        loanp.save()
+        player.loan_id = loanp.id
+        player.player_turn_finish = True
+        player.save()
+        if check_turn_finish(game_id):
+            end_turn(game_id)
 
+        return JsonResponse({
+            'success': not error,
+            'error': error
+        })
 
 
 

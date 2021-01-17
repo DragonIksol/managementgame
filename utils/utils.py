@@ -82,6 +82,9 @@ def end_turn(game_id):
     game.game_stage = ((game.game_stage) % 5) + 1
     game.save()
     players = PlayerGameInfo.objects.filter(room_id=game_id)
+    if game.game_stage == 1:
+        #end_month
+        pass
     for player in players:
         player.player_turn_finish = False
         player.save()
@@ -116,6 +119,6 @@ def post(self, request, *args, **kwargs):
     player.player_turn_finish = True
     player.save()
     return JsonResponse({
-    'success': not error,
-    'error': error
+        'success': not error,
+        'error': error
     })
