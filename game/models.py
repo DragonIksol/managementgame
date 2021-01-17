@@ -56,6 +56,7 @@ class PlayerGameInfo(models.Model):
     auto_fabric_count = models.IntegerField(null=True, blank=True)
     simple_fabric_count = models.IntegerField(null=True, blank=True)
     esm = models.IntegerField(null=True, blank=True)
+    esm_produce = models.SmallIntegerField(null=True, blank=True)
     egp = models.IntegerField(null=True, blank=True)
     senior_player = models.BooleanField(null=True, default=False)
     senioring = models.SmallIntegerField(null=True, blank=True)

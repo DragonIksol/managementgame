@@ -66,10 +66,23 @@ def get_next_level(game_id):
 #проверяет закончили ли свой этап все игроки
 def check_turn_finish(game_id):
     players = PlayerGameInfo.objects.filter(room_id=game_id)
-    player_wil = True
+    all_finish = True
     for player in players:
-        player_wil = player_wil and player.player_turn_finish
-    return player_wil
+        if not player.player_turn_finish:
+            all_finish = False
+            break
+    return all_finish
+
+
+def end_turn(game_id):
+    game = Game.objects.get(id=game_id)
+    game.game_stage = ((game.game_stage) % 5) + 1
+    game.save()
+    players = PlayerGameInfo.objects.filter(room_id=game_id)
+    for player in players:
+        player.player_turn_finish = False
+        player.save()
+
 
 
 

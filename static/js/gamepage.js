@@ -338,12 +338,12 @@ class Game {
                     </tr>
                     <tr>
                         <td>Обычная</td>
-                        <td><input type="number" id="simpleFabricBuild" min="0" max="${Math.floor(me.playerCard.capital/10000)}"></td>
+                        <td><input type="number" id="simpleFabricBuildInput" min="0" max="${Math.floor(me.playerCard.capital/10000)}"></td>
                         <td>10000$</td>
                     </tr>
                     <tr>
                         <td>Автоматизированная</td>
-                        <td><input type="number" id="autoFabricBuild" min="0" max="${Math.floor(me.playerCard.capital/20000)}"></td>
+                        <td><input type="number" id="autoFabricBuildInput" min="0" max="${Math.floor(me.playerCard.capital/20000)}"></td>
                         <td>20000$</td>
                     </tr>
                 </table>
@@ -379,8 +379,8 @@ class Game {
 
             const inputListenerHandler = () => {
                 const automatizationCost = fabricCountAutomatizationInput.valueAsNumber * 7000,
-                    resultCost = simpleFabricBuildInput.valueAsNumber * 10000 + autoFabricBuildInput.valueAsNumber * 20000 + automatizationCost;
-                const allFabricsCount = me.playerCard.haveFabrics + simpleFabricBuildInput.valueAsNumber + autoFabricBuildInput.valueAsNumber;
+                    resultCost = (simpleFabricBuildInput.valueAsNumber || 0) * 10000 + (autoFabricBuildInput.valueAsNumber || 0) * 20000 + automatizationCost;
+                const allFabricsCount = me.playerCard.haveFabrics + simpleFabricBuildInput.valueAsNumber || 0 + autoFabricBuildInput.valueAsNumber || 0;
                 autoCostSpan.innerText = Number.isNaN(automatizationCost) ? '' : automatizationCost + '$';
                 sendBtn.disabled = allFabricsCount > 6 || resultCost > me.playerCard.capital;
                 if (me.playerCard.haveFabrics > 6) {
@@ -394,63 +394,68 @@ class Game {
 
             simpleFabricBuildInput.oninput = inputListenerHandler;
             simpleFabricBuildInput.onchange = onchange = () => {
-                me.correctInputIntValue(simpleFabricBuildInput, 0, Math.floor((me.playerCard.capital - ((autoFabricBuildInput.valueAsNumber || 0) * 20000))/10000))
+                me.correctInputIntValue(simpleFabricBuildInput, 0, Math.floor((me.playerCard.capital - ((autoFabricBuildInput.valueAsNumber || 0) * 20000)) / 10000));
             };
             autoFabricBuildInput.oninput = inputListenerHandler;
             autoFabricBuildInput.onchange = () => {
-                me.correctInputIntValue(autoFabricBuildInput, 0, Math.floor((me.playerCard.capital - ((simpleFabricBuildInput.valueAsNumber || 0) * 10000))/20000))
+                me.correctInputIntValue(autoFabricBuildInput, 0, Math.floor((me.playerCard.capital - ((simpleFabricBuildInput.valueAsNumber || 0) * 10000)) / 20000));
+            };
+            fabricCountAutomatizationInput.oninput = inputListenerHandler;
+            fabricCountAutomatizationInput.onchange = () => {
+                me.correctInputIntValue(fabricCountAutomatizationInput, 0, me.playerCard.haveFabrics);
+                inputListenerHandler();
             };
         });
 
-        playerCard.addEventListener('automatizationRequestBtnClick',(e) => {
-            const wnd = createEl('base-window', {
-                winTitle: 'Заявка на автоматизацию фабрик'
-            })
-            document.body.appendChild(wnd);
-            const winContent = wnd.querySelector('#win-content');
-            winContent.innerHTML = `
-                <div>Количество доступных для автоматизации фабрик: ${me.playerCard.simpleFabrics}</div>
-                <hr>
-                <input id="fabricCountInput" type="number" placeholder="Введите количество фабрик">
-                <div>Стоимость автоматизации: <span id="autoCostSpan"></span></div>
-            `
-            const bottomTools = wnd.querySelector('footer');
-            const sendBtn = createEl('button', {
-                innerText: 'Отправить',
-                className: 'middle-button',
-                onclick: function () {
-                    console.log('Send');;
-                }
-            })
+        // playerCard.addEventListener('automatizationRequestBtnClick',(e) => {
+        //     const wnd = createEl('base-window', {
+        //         winTitle: 'Заявка на автоматизацию фабрик'
+        //     })
+        //     document.body.appendChild(wnd);
+        //     const winContent = wnd.querySelector('#win-content');
+        //     winContent.innerHTML = `
+        //         <div>Количество доступных для автоматизации фабрик: ${me.playerCard.simpleFabrics}</div>
+        //         <hr>
+        //         <input id="fabricCountInput" type="number" placeholder="Введите количество фабрик">
+        //         <div>Стоимость автоматизации: <span id="autoCostSpan"></span></div>
+        //     `
+        //     const bottomTools = wnd.querySelector('footer');
+        //     const sendBtn = createEl('button', {
+        //         innerText: 'Отправить',
+        //         className: 'middle-button',
+        //         onclick: function () {
+        //             console.log('Send');;
+        //         }
+        //     })
 
-            bottomTools.append(
-                createEl('button', {
-                    innerText: 'Назад',
-                    className: 'middle-button',
-                    onclick: function () {
-                        wnd.close();
-                    }
-                }),
-                sendBtn
-            );
+        //     bottomTools.append(
+        //         createEl('button', {
+        //             innerText: 'Назад',
+        //             className: 'middle-button',
+        //             onclick: function () {
+        //                 wnd.close();
+        //             }
+        //         }),
+        //         sendBtn
+        //     );
 
-            const fabricCountInput = winContent.querySelector('#fabricCountInput'),
-                autoCostSpan = winContent.querySelector('#autoCostSpan');
+        //     const fabricCountInput = winContent.querySelector('#fabricCountInput'),
+        //         autoCostSpan = winContent.querySelector('#autoCostSpan');
 
-            const inputListenerHandler = () => {
-                const autoCost = fabricCountInput.valueAsNumber * 7000;
-                autoCostSpan.innerText = Number.isNaN(autoCost) ? '' : autoCost + '$';
-                sendBtn.disabled = autoCost > me.playerCard.capital;
-            }
+        //     const inputListenerHandler = () => {
+        //         const autoCost = fabricCountInput.valueAsNumber * 7000;
+        //         autoCostSpan.innerText = Number.isNaN(autoCost) ? '' : autoCost + '$';
+        //         sendBtn.disabled = autoCost > me.playerCard.capital;
+        //     }
 
-            fabricCountInput.oninput = () => {
-                inputListenerHandler()
-            }
-            fabricCountInput.onchange = () => {
-                me.correctInputIntValue(fabricCountInput, 0, me.playerCard.capital / 7000);
-                inputListenerHandler()
-            };
-        });
+        //     fabricCountInput.oninput = () => {
+        //         inputListenerHandler()
+        //     }
+        //     fabricCountInput.onchange = () => {
+        //         me.correctInputIntValue(fabricCountInput, 0, me.playerCard.capital / 7000);
+        //         inputListenerHandler()
+        //     };
+        // });
 
         playerCard.addEventListener('loanRequestBtnClick',(e) => {
             const wnd = createEl('base-window', {
@@ -535,8 +540,8 @@ class Game {
                 'Content-Type': 'application/json;charset=utf-8'
             },
             body: JSON.stringify({
-                simple_fabric_produce: EGPCount,
-                cost: cost,
+                simple_fabric_produce: simpleFabricProduce,
+                auto_fabric_produce: autoFabricProduce,
                 game_id: window.GAME_ID
             })
         });
