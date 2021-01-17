@@ -164,9 +164,6 @@ class FinalTurnView(View):
         })
 
 
-
-
-
 class ProduceEGPView(View):
     def post(self, request, *args, **kwargs):
         params = json.loads(request.body)
@@ -241,7 +238,7 @@ class BuyESMView(View):
         while (self.esm_count != 0 or esm_request_mass):
             players = []
             for esm_request in esm_request_mass:
-                players.append(PlayerGameInfo.objects.filter(
+                players.append(PlayerGameInfo.objects.get(
                     esm_request_id=esm_request.id))
             self.choose_seniors_esm_request(players)
         return
@@ -317,7 +314,7 @@ class SellEGPView(View):
         while (self.egp_count != 0 or egp_request_mass):
             players = []
             for egp_request in egp_request_mass:
-                players.append(PlayerGameInfo.objects.filter(
+                players.append(PlayerGameInfo.objects.get(
                     egp_request_id=egp_request.id))
             self.choose_seniors_request(players)
         return
