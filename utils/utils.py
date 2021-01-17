@@ -97,4 +97,5 @@ def deduction_of_costs(game_id):
 def deduction_of_costs_personal(player):
     player.capital = player.capital - player.esm * 300 - player.egp * 500 - player.simple_fabric_count * 1000 - player.auto_fabric_count * 1500
     player.capital = player.capital - Loan.objects.get(id=player.loan_id).loan_amount*0.01
+    player.save()
     return
