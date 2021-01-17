@@ -79,17 +79,32 @@ def check_turn_finish(game_id):
 #новый месяц
 def end_month(game_id):
     deduction_of_costs(game_id)
+    #смена уровня и увеличение месяца
     game = Game.objects.get(id=game_id)
     game.step = game.step + 1
     game.level = get_next_level(game_id)
     game.save()
+    # отслеживание постройки заводов
+    playergameinfos = PlayerGameInfo.objects.filter(room_id=game_id)
+    for playergameinfo in playergameinfos:
+        buildlist = BuildRequestList.objects.filter(player_info_id=playergameinfo.id)
+        for buildreq_in_list in buildlist:
+            buildrequest = BuildRequest.objects.get(id=buildreq_in_list.request_id)
+            if (buildrequest.step >= (game.step + 5)):
+                playergameinfo.simple_fabric_count = playergameinfo.simple_fabric_count + buildrequest.simple_fabric_count
+                playergameinfo.auto_fabric_count = playergameinfo.auto_fabric_count + buildrequest.automatical_fabric_count
+                playergameinfo.save()
+                buildrequest.delete()
     #заявка на строительство и апгрейд выполняется
-    playergameinfo = PlayerGameInfo.objects.get(room_id=game_id)
-    playergameinfo.egp = playergameinfo.egp + playergameinfo.esm_produce
-    playergameinfo.esm = playergameinfo.esm - playergameinfo.esm_produce
-    playergameinfo.esm_produce = 0
-    playergameinfo.save()
+    for playergameinfo in playergameinfos:
+        playergameinfo.egp = playergameinfo.egp + playergameinfo.esm_produce
+        playergameinfo.esm = playergameinfo.esm - playergameinfo.esm_produce
+        playergameinfo.esm_produce = 0
+        playergameinfo.save()
     pass
+
+#отслеживание постройки заводов
+
 
 
 def end_turn(game_id):
