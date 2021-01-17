@@ -48,7 +48,7 @@ class Game {
 
         const playersData = gameData.players_data;
         const playersCards = document.querySelectorAll('player-card');
-        playerIds = playersData.map((el) => {
+        const playerIds = playersData.map((el) => {
             return el.player_id;
         })
         playersCards.forEach((card) => {

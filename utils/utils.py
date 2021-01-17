@@ -90,7 +90,7 @@ def end_month(game_id):
         buildlist = BuildRequestList.objects.filter(player_info_id=playergameinfo.id)
         for buildreq_in_list in buildlist:
             buildrequest = BuildRequest.objects.get(id=buildreq_in_list.request_id)
-            if (buildrequest.step >= (game.step + 5)):
+            if ((buildrequest.step + 5) == game.step):
                 playergameinfo.simple_fabric_count = playergameinfo.simple_fabric_count + buildrequest.simple_fabric_count
                 playergameinfo.auto_fabric_count = playergameinfo.auto_fabric_count + buildrequest.automatical_fabric_count
                 playergameinfo.save()
@@ -99,9 +99,9 @@ def end_month(game_id):
         upgradelist = AutomatizationRequestList.objects.filter(player_info_id=playergameinfo.id)
         for upgradereqlist in upgradelist:
             upgraderequest = AutomatizationRequest.objects.get(id=upgradereqlist.request_id)
-            if (upgraderequest.step >= (game.step + 9)):
-                playergameinfo.simple_fabric_count = playergameinfo.simple_fabric_count - 1
-                playergameinfo.auto_fabric_count = playergameinfo.auto_fabric_count + 1
+            if ((upgraderequest.step + 9) == game.step):
+                playergameinfo.simple_fabric_count = playergameinfo.simple_fabric_count - upgraderequest.count
+                playergameinfo.auto_fabric_count = playergameinfo.auto_fabric_count + upgraderequest.count
                 playergameinfo.save()
                 upgraderequest.delete()
     #заявка на строительство и апгрейд выполняется
@@ -109,8 +109,9 @@ def end_month(game_id):
         playergameinfo.egp = playergameinfo.egp + playergameinfo.esm_produce
         playergameinfo.esm = playergameinfo.esm - playergameinfo.esm_produce
         playergameinfo.esm_produce = 0
+        playergameinfo.senioring = (playergameinfo.senioring + 1) % game.players_count
+        playergameinfo.senior_player = (playergameinfo.senioring == 0)
         playergameinfo.save()
-    pass
 
 def end_turn(game_id):
     game = Game.objects.get(id=game_id)
@@ -134,6 +135,8 @@ def deduction_of_costs(game_id):
 
 # Изьятие издержек у игрока
 def deduction_of_costs_personal(player):
-    player.capital = player.capital - player.esm * 300 - player.egp * 500 - player.simple_fabric_count * 1000 - player.auto_fabric_count * 1500
-    player.capital = player.capital - Loan.objects.get(id=player.loan_id).loan_amount*0.01
+    player.capital = player.capital - player.esm * 300 - player.egp * 500 - (player.simple_fabric_count or 0) * 1000 - (player.auto_fabric_count or 0) * 1500
+    loans = Loan.objects.filter(id=player.loan_id)
+    for loan in loans:
+        player.capital = player.capital - loan.loan_amount*0.01
     player.save()

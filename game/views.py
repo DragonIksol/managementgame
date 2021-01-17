@@ -131,12 +131,17 @@ class SurrenderView(View):
             player.esm_request_id and player.esm_request_id.delete()
             player.egp_request_id and player.egp_request_id.delete()
             player.loan_id and player.loan_id.delete()
+            senioring = player.senioring
+            other_players =  PlayerGameInfo.objects.filter(room_id=game_id).exclude(player_id=player.id)
+            for other in other_players:
+                if other.senioring > senioring:
+                    other.senioring -= 1
             build_request_list = BuildRequestList.objects.filter(player_info_id=player.id)
             for request in build_request_list:
                 build_request = BuildRequest.objects.get(id=request.request_id_id)
                 build_request.delete()
             auto_request_list = AutomatizationRequestList.objects.filter(player_info_id=player.id)
-            for request in build_request_list:
+            for request in auto_request_list:
                 auto_request = AutomatizationRequest.objects.get(id=request.request_id_id)
                 auto_request.delete()
 
@@ -410,16 +415,20 @@ class BuildAutomatizationRequestView(View):
         error = None
 
         game = Game.objects.get(id=game_id)
+        player = PlayerGameInfo.objects.get(room_id=game_id, player_id=request.user.id)
 
         build_request = BuildRequest(step=game.step, automatical_fabric_count=auto_build, simple_fabric_count=simple_build)
         build_request.save()
-        build_request_list = BuildRequestList(player_info_id=request.user.id, request_id=build_request.id)
+        build_request_list = BuildRequestList(player_info_id=player, request_id=build_request)
         build_request_list.save()
 
         automatization_request = AutomatizationRequest(step=game.step, count=automatization)
         automatization_request.save()
-        automatization_request_list = AutomatizationRequestList(player_info_id=request.user.id, request_id=automatization_request.id)
+        automatization_request_list = AutomatizationRequestList(player_info_id=player, request_id=automatization_request)
         automatization_request_list.save()
+
+        player.player_turn_finish = True
+        player.save()
 
         if check_turn_finish(game_id):
             end_turn(game_id)
