@@ -289,9 +289,9 @@ class BuyESMView(View):
     def subtraction_capital_of_buy(self, esm_count, esm_price, esm_request):
         player = PlayerGameInfo.objects.get(esm_request_id=esm_request.id)
         player.capital = player.capital - esm_count * esm_price
-        game = Game.objects.get(id=self.game_id)
         player.esm = player.esm + esm_count
-        game.log = game.log + 'Продано игроку' + Player.objects.get(id=self.game_id).last_login + esm_count + 'ЕСМ за'  + esm_count
+        game = Game.objects.get(id=self.game_id)
+        game.log = game.log + 'Продано игроком' + Player.objects.get(id=self.game_id).last_login + esm_count + 'ЕСМ за'  + esm_count
         game.save()
         player.save()
         esm_request.delete()
@@ -379,6 +379,10 @@ class SellEGPView(View):
         player.capital = player.capital + egp_count * egp_price
         player.egp = player.egp - egp_count
         player.save()
+        game = Game.objects.get(id=self.game_id)
+        game.log = game.log + 'Куплено у игрока' + Player.objects.get(
+            id=self.game_id).last_login + egp_count + 'ЕГП за' + egp_price
+        game.save()
         egp_request.delete()
 
     def clear_egp_requests(self):
