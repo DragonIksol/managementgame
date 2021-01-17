@@ -187,7 +187,7 @@ class BuyESMView(View):
                     break
 
             if all_finish:
-                #завершить стадию
+                # завершить стадию
                 pass
         except BaseException as err:
             print(err)
@@ -223,7 +223,7 @@ class ProduceEGPView(View):
                     break
 
             if all_finish:
-                #завершить стадию
+                # завершить стадию
                 pass
 
         except BaseException as err:
@@ -264,6 +264,8 @@ class SellEGPView(View):
         })
 
     def bank_EGP_bargaining(self, game_id):
+        game = Game.objects.get(id=game_id)
+        self.egp_count = math.floor(costs_by_level_map[game.level][2] * game.players_count)
         players = PlayerGameInfo.objects.filter(room_id=game_id)
         egp_s = []
         for player in players:
@@ -275,14 +277,36 @@ class SellEGPView(View):
     def choose_interested_request(self, egp_s):
         egp_s_price_mass = [x.egp_price for x in egp_s]
         min_price_egp = min(egp_s_price_mass)
-        egp_request_mass = EGPRequest.objects.filter(egp_price=min_price_egp)
-        players = []
-        for egp_request in egp_request_mass:
-            players.append(PlayerGameInfo.objects.filter(
-                egp_request_id=egp_request.id))
-        self.choose_seniors_request(players)
+        egp_request_mass = EGPRequest.objects.filter(egp_price=min_price_egp).exclude(bank_response=True)
+        while (self.egp_count != 0 or egp_request_mass):
+            players = []
+            for egp_request in egp_request_mass:
+                players.append(PlayerGameInfo.objects.filter(
+                    egp_request_id=egp_request.id))
+            self.choose_seniors_request(players)
         return
 
-    # здесь формируются списки игроки чьи заявки по старшинству важнее
-    def choose_seniors_request(self,players):
-        pass
+    # здесь формируются игрок чья заявка по старшинству важнее
+    def choose_seniors_request(self, players):
+        players_senior = [x.senioring for x in players]
+        min_senior_rang = min(players_senior)
+        player_with_true_respon = PlayerGameInfo.objects.get(senioring=min_senior_rang)
+        egp_request = EGPRequest.objects.get(id=player_with_true_respon.egp_request_id)
+        self.minus_ebuchai_zaiavka(egp_request)
+
+    def minus_ebuchai_zaiavka(self, egp_request):
+        if self.egp_count >= egp_request.egp_count:
+            self.egp_count = self.egp_count - egp_request.egp_count
+            self.add_capital_of_sold(egp_request.egp_count, egp_request.egp_price, egp_request)
+        else:
+            self.add_capital_of_sold(self.egp_count, egp_request.egp_price, egp_request)
+            self.egp_count = 0
+        return
+
+    def add_capital_of_sold(self, egp_count, egp_price, egp_request):
+        player = PlayerGameInfo.objects.get(egp_request_id=egp_request.id)
+        player.capital = player.capital + egp_count * egp_price
+        player.save()
+        egp_request.bank_response = True
+        egp_request.save()
+        return
