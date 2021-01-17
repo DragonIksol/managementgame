@@ -89,7 +89,7 @@ def end_month(game_id):
     for playergameinfo in playergameinfos:
         buildlist = BuildRequestList.objects.filter(player_info_id=playergameinfo.id)
         for buildreq_in_list in buildlist:
-            buildrequest = BuildRequest.objects.get(id=buildreq_in_list.request_id)
+            buildrequest = BuildRequest.objects.get(id=buildreq_in_list.request_id.id)
             if ((buildrequest.step + 5) == game.step):
                 playergameinfo.simple_fabric_count = playergameinfo.simple_fabric_count + buildrequest.simple_fabric_count
                 playergameinfo.auto_fabric_count = playergameinfo.auto_fabric_count + buildrequest.automatical_fabric_count
@@ -98,7 +98,7 @@ def end_month(game_id):
         #отслеживание апгрейда
         upgradelist = AutomatizationRequestList.objects.filter(player_info_id=playergameinfo.id)
         for upgradereqlist in upgradelist:
-            upgraderequest = AutomatizationRequest.objects.get(id=upgradereqlist.request_id)
+            upgraderequest = AutomatizationRequest.objects.get(id=upgradereqlist.request_id.id)
             if ((upgraderequest.step + 9) == game.step):
                 playergameinfo.simple_fabric_count = playergameinfo.simple_fabric_count - upgraderequest.count
                 playergameinfo.auto_fabric_count = playergameinfo.auto_fabric_count + upgraderequest.count
