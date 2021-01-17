@@ -76,15 +76,30 @@ def check_turn_finish(game_id):
             break
     return all_finish
 
+#новый месяц
+def end_month(game_id):
+    deduction_of_costs(game_id)
+    game = Game.objects.get(id=game_id)
+    game.step = game.step + 1
+    game.level = get_next_level(game_id)
+    game.save()
+    #заявка на строительство и апгрейд выполняется
+    playergameinfo = PlayerGameInfo.objects.get(room_id=game_id)
+    playergameinfo.egp = playergameinfo.egp + playergameinfo.esm_produce
+    playergameinfo.esm = playergameinfo.esm - playergameinfo.esm_produce
+    playergameinfo.esm_produce = 0
+    playergameinfo.save()
+    pass
+
 
 def end_turn(game_id):
     game = Game.objects.get(id=game_id)
     game.game_stage = ((game.game_stage) % 5) + 1
-    game.save()
     players = PlayerGameInfo.objects.filter(room_id=game_id)
     if game.game_stage == 1:
-        #end_month
+        end_month(game_id)
         pass
+    game.save()
     for player in players:
         player.player_turn_finish = False
         player.save()
