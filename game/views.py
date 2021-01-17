@@ -131,7 +131,10 @@ class SurrenderView(View):
             player.delete()
             room = Game.objects.get(id=game_id)
             room.players_count = room.players_count - 1
-            room.save()
+            if room.players_count == 0:
+                room.delete()
+            else:
+                room.save()
         except BaseException as err:
             print(err)
             error = str(err)
@@ -173,7 +176,56 @@ class BuyESMView(View):
             esm_request = ESMRequest(esm_count=esm_count, esm_price=cost)
             esm_request.save()
             player.esm_request_id = esm_request.id
+            player.player_turn_finish = True
             player.save()
+
+            all_finish = True
+            all_players = PlayerGameInfo.objects.filter(room_id=game_id)
+            for player in all_players:
+                if not player.player_turn_finish:
+                    all_finish = False
+                    break
+
+            if all_finish:
+                #завершить стадию
+                pass
+        except BaseException as err:
+            print(err)
+            error = str(err)
+
+        return JsonResponse({
+            'success': not error,
+            'error': error
+        })
+
+
+class ProduceEGPView(View):
+    def post(self, request, *args, **kwargs):
+        params = json.loads(request.body)
+        esm_count = params.get('esm_count')
+        cost = params.get('cost')
+        game_id = params.get('game_id')
+        error = None
+
+        try:
+            player = PlayerGameInfo.objects.get(player_id=request.user.id, room_id=game_id)
+            esm_request = ESMRequest(esm_count=esm_count, esm_price=cost)
+            esm_request.save()
+            player.esm_request_id = esm_request.id
+            player.player_turn_finish = True
+            player.save()
+
+            all_finish = True
+            all_players = PlayerGameInfo.objects.filter(room_id=game_id)
+            for player in all_players:
+                if not player.player_turn_finish:
+                    all_finish = False
+                    break
+
+            if all_finish:
+                #завершить стадию
+                pass
+
         except BaseException as err:
             print(err)
             error = str(err)
