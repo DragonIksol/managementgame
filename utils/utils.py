@@ -95,6 +95,15 @@ def end_month(game_id):
                 playergameinfo.auto_fabric_count = playergameinfo.auto_fabric_count + buildrequest.automatical_fabric_count
                 playergameinfo.save()
                 buildrequest.delete()
+        #отслеживание апгрейда
+        upgradelist = AutomatizationRequestList.objects.filter(player_info_id=playergameinfo.id)
+        for upgradereqlist in upgradelist:
+            upgraderequest = AutomatizationRequest.objects.get(id=upgradereqlist.request_id)
+            if (upgraderequest.step >= (game.step + 9)):
+                playergameinfo.simple_fabric_count = playergameinfo.simple_fabric_count - 1
+                playergameinfo.auto_fabric_count = playergameinfo.auto_fabric_count + 1
+                playergameinfo.save()
+                upgraderequest.delete()
     #заявка на строительство и апгрейд выполняется
     for playergameinfo in playergameinfos:
         playergameinfo.egp = playergameinfo.egp + playergameinfo.esm_produce
@@ -102,10 +111,6 @@ def end_month(game_id):
         playergameinfo.esm_produce = 0
         playergameinfo.save()
     pass
-
-#отслеживание постройки заводов
-
-
 
 def end_turn(game_id):
     game = Game.objects.get(id=game_id)
