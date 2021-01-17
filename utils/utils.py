@@ -30,6 +30,8 @@ def get_current_player(game_id):
     cur_player_index = (step - 1 + senior_index) % players_count
     return players[cur_player_index]
 
+def get_game_month(game_id):
+    return 1
 
 def get_senior_player(game_id):
     # game = Game.objects.get(id=game_id)

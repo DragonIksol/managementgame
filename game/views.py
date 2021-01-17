@@ -78,22 +78,81 @@ class GameDataView(View):
     def get(self, request, *args, **kwargs):
         game_id = request.GET.get('game_id')
         data = {}
+        players_data = []
         game = Game.objects.get(id=game_id)
+
+        players_info = PlayerGameInfo.objects.filter(room_id=game_id)
+
+        for player in players_info:
+            build_requests = BuildRequestList.objects.filter(player_info_id=player.id)
+            automatization_fabrics = AutomatizationRequestList.objects.filter(player_info_id=player.id)
+            players_data.append({
+                'room_id': player.room_id.id,
+                'player_id': player.player_id.id,
+                'loan': player.loan_id.loan_amount if player.loan_id else None,
+                'capital': player.capital,
+                'auto_fabric_count': player.auto_fabric_count,
+                'simple_fabric_count': player.simple_fabric_count,
+                'esm': player.esm,
+                'egp': player.egp,
+                'senior_player': player.senior_player,
+                'build_fabrics': len(build_requests),
+                'automatization_fabrics': len(automatization_fabrics),
+                'player_turn_finish': player.player_turn_finish
+            })
 
         data.update({
             'id': game.id,
             'players_count': game.players_count,
-            'current_player_turn': get_current_player(game_id).id,
-            'step': game.step,
+            'month': game.step,
+            'game_stage': game.game_stage,
+            'game_stage_name': game.game_stage_map.get(game.game_stage),
             'level': game.level,
             'esm_bank': math.floor(costs_by_level_map[game.level][0] * game.players_count),
             'min_buy_esm': costs_by_level_map[game.level][1],
             'egp_bank': math.floor(costs_by_level_map[game.level][2] * game.players_count),
-            'max_sell_egp': costs_by_level_map[game.level][3]
+            'max_sell_egp': costs_by_level_map[game.level][3],
+            'players_data': players_data
         })
 
         return JsonResponse({
             'data': data
+        })
+
+
+class SurrenderView(View):
+    def post(self, request, *args, **kwargs):
+        params = json.loads(request.body)
+        game_id = params.get('game_id')
+        error = None
+        try:
+            player = PlayerGameInfo.objects.get(room_id=game_id, player_id=request.user.id)
+            player.delete()
+            room = Game.objects.get(id=game_id)
+            room.players_count = room.players_count - 1
+            room.save()
+        except BaseException as err:
+            print(err)
+            error = str(err)
+        return JsonResponse({
+            'success': not error,
+            'error': error
+        })
+
+#TODO
+class FinalTurnView(View):
+    def post(self, request, *args, **kwargs):
+        params = json.loads(request.body)
+        game_id = params.get('game_id')
+        error = None
+        player = PlayerGameInfo.objects.get(player_id=request.user.id, room_id=game_id)
+
+        player.player_turn_finish = True
+        player.save()
+
+        return JsonResponse({
+            'success': not error,
+            'error': error
         })
 
 #TODO купить ЕСМ
@@ -106,7 +165,15 @@ class BuyESMView(View):
         game_id = params.get('game_id')
         error = None
 
-        print(esm_count, cost, game_id)
+        try:
+            player = PlayerGameInfo.objects.get(player_id=request.user.id, room_id=game_id)
+            esm_request = ESMRequest(esm_count=esm_count, esm_price=cost)
+            esm_request.save()
+            player.esm_request_id = esm_request.id
+            player.save()
+        except BaseException as err:
+            print(err)
+            error = str(err)
 
         return JsonResponse({
             'success': not error,
@@ -124,19 +191,6 @@ class SellEGPView(View):
         error = None
 
         print(egp_count, cost, game_id)
-
-        return JsonResponse({
-            'success': not error,
-            'error': error
-        })
-
-#TODO
-class FinalTurnView(View):
-    def post(self, request, *args, **kwargs):
-        params = json.loads(request.body)
-        game_id = params.get('game_id')
-        error = None
-        print(game_id)
 
         return JsonResponse({
             'success': not error,

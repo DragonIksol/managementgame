@@ -14,12 +14,12 @@ button {
 </style>
 <div class="player-card">
     <div class="action-container">
-        <button id="buyESMBtn" class="action-btn">Купить ЕСМ</button>
-        <button id="sellEGPBtn" class="action-btn">Продать ЕГП</button>
-        <button id="produceBtn" class="action-btn">Производство продукции</button>
-        <button id="buildRequestBtn" class="action-btn">Заявка на строительство</button>
-        <button id="automatizationRequestBtn" class="action-btn">Заявка на автоматизацию</button>
-        <button id="loanRequestBtn" class="action-btn">Заявка на получение ссуды</button>
+        <button disabled id="buyESMBtn" class="action-btn">Купить ЕСМ</button>
+        <button disabled id="produceBtn" class="action-btn">Производство продукции</button>
+        <button disabled id="sellEGPBtn" class="action-btn">Продать ЕГП</button>
+        <button disabled id="loanRequestBtn" class="action-btn">Заявка на получение ссуды</button>
+        <button disabled id="buildRequestBtn" class="action-btn">Заявка на строительство</button>
+        <button disabled id="automatizationRequestBtn" class="action-btn">Заявка на автоматизацию</button>
     </div>
     <div class="horizontal-container">
         <div id="avatar-container" class="avatar-container">
@@ -150,6 +150,27 @@ customElements.define('player-card',
                 }
             })
         }
+
+        enableBuyESM() {
+            this.shadowRoot.querySelector('#buyESMBtn').disabled = false;
+        }
+
+        enableProduceEGP() {
+            this.shadowRoot.querySelector('#produceBtn').disabled = false;
+        }
+
+        enableSellEGP() {
+            this.shadowRoot.querySelector('#sellEGPBtn').disabled = false;
+        }
+
+        enableGetLoan() {
+            this.shadowRoot.querySelector('#loanRequestBtn').disabled = false;
+        }
+
+        enableBuildFabrics() {
+            this.shadowRoot.querySelector('#buildRequestBtn').disabled = false;
+        }
+
 
         get EGP() {
             return this.#EGP;

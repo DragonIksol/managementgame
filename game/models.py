@@ -14,6 +14,16 @@ class Game(models.Model):
     step = models.IntegerField(null=True, blank=True)
     level = models.IntegerField(null=True, default=3)
 
+    game_stage = models.IntegerField(null=True, blank=True)
+
+    game_stage_map = {
+        1: 'buy_esm',
+        2: 'produce_egp',
+        3: 'sell_egp',
+        4: 'get_loan',
+        5: 'build_fabrics'
+    }
+
 
 class EGPRequest(models.Model):
     egp_count = models.IntegerField(null=True, blank=True)
@@ -48,6 +58,7 @@ class PlayerGameInfo(models.Model):
     esm = models.IntegerField(null=True, blank=True)
     egp = models.IntegerField(null=True, blank=True)
     senior_player = models.BooleanField(null=True, default=False)
+    player_turn_finish = models.BooleanField(null=True, default=False)
     esm_request_id = models.ForeignKey(ESMRequest, null=True, blank=True, on_delete=models.SET_NULL)
     egp_request_id = models.ForeignKey(EGPRequest, null=True, blank=True, on_delete=models.SET_NULL)
 

@@ -9,17 +9,44 @@ class Game {
     #minBuyESM = 0
     #EGPBank = 0
     #maxSellEGP = 0
+    #playerTurn = false
 
     playerCard = null
+    watchGameStateInterval = null
 
     constructor() {
         this.loadGame();
     }
 
     async loadGame() {
+        const gameData = await this.getGameData();
+        this.setGameState(gameData);
+        this.watchGameState();
+
+        this.initListeners();
+    }
+
+    watchGameState() {
+        var me = this,
+            finalTurnBtn = document.getElementById('finalTurnBtn');;
+        me.watchGameStateInterval = setInterval(async () => {
+            const gameData = await me.getGameData();
+            me.setGameState(gameData);
+        }, 1000)
+    }
+
+    setGameState(gameData) {
         const me = this,
-            playersData = await this.getPlayersData(),
             finalTurnBtn = document.getElementById('finalTurnBtn');
+        this.playersCount = gameData.players_count;
+        this.step = gameData.step;
+        this.level = gameData.level;
+        this.ESMBank = gameData.esm_bank;
+        this.minBuyESM = gameData.min_buy_esm;
+        this.EGPBank = gameData.egp_bank;
+        this.maxSellEGP = gameData.max_sell_egp;
+
+        const playersData = gameData.players_data;
         playersData.forEach(el => {
             const playerCard = document.getElementById(el.player_id);
             playerCard.capital = el.capital;
@@ -30,25 +57,39 @@ class Game {
             playerCard.loans = el.loan;
             playerCard.seniorPlayer = el.senior_player;
             playerCard.buildFabrics = el.build_fabrics;
-            playerCard.playerTurn = el.player_turn
+            playerCard.playerTurn = !el.player_turn_finish
 
             if (window.USERID === el.player_id) {
                 me.playerCard = playerCard;
 
-                playerCard.setDisabledActions(!playerCard.playerTurn);
-                finalTurnBtn.disabled = !playerCard.playerTurn;
+
+                if (playerCard.playerTurn) {
+                    switch (gameData.game_stage) {
+                        case 1: //Купить ЕСМ
+                            playerCard.enableBuyESM()
+                            break;
+                        case 2: //Произвести ЕГП
+                            playerCard.enableProduceEGP()
+                            break;
+                        case 3: //Продать ЕГП
+                            playerCard.enableSellEGP()
+                            break;
+                        case 4: //Получить ссуду
+                            playerCard.enableGetLoan()
+                            break;
+                        case 5: //Строительство и обновление
+                            playerCard.enableBuildFabrics()
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    playerCard.setDisabledActions(true);
+                    // finalTurnBtn.disabled = true;
+                }
             }
         });
-        const gameData = await this.getGameData();
-        this.playersCount = gameData.players_count;
-        this.step = gameData.step;
-        this.level = gameData.level;
-        this.ESMBank = gameData.esm_bank;
-        this.minBuyESM = gameData.min_buy_esm;
-        this.EGPBank = gameData.egp_bank;
-        this.maxSellEGP = gameData.max_sell_egp;
 
-        this.initListeners();
     }
 
     correctInputIntValue(input, min, max) {
@@ -431,11 +472,27 @@ class Game {
         });
 
         surrenderBtn.onclick = async () => {
-            console.log('Surrender');
+            await me.surrender();
         }
 
         finalTurnBtn.onclick = async () => {
             await me.finalTurn()
+        }
+    }
+
+    async surrender() {
+        const response = await fetch('surrender', {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                game_id: window.GAME_ID
+            })
+        });
+        const obj = await response.json();
+        if (obj.success) {
+            window.location.href = window.location.origin;
         }
     }
 
@@ -532,6 +589,14 @@ class Game {
     }
     set maxSellEGP(val) {
         this.#maxSellEGP = val;
+        document.getElementById('maxSellEGP').innerText = val;
+    }
+
+    get playerTurn() {
+        return this.#playerTurn;
+    }
+    set playerTurn(val) {
+        this.#playerTurn = val;
         document.getElementById('maxSellEGP').innerText = val;
     }
 }

@@ -178,6 +178,7 @@ class StartGame(View):
             room = Game.objects.get(id=room_id)
             room.step = 1
             room.level = 3
+            room.game_stage = 1
             players_info = PlayerGameInfo.objects.filter(room_id=room.id)
             for player in players_info:
                 player.capital = 10000
