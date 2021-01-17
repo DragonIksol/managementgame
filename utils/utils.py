@@ -131,11 +131,9 @@ def deduction_of_costs(game_id):
     players = PlayerGameInfo.objects.filter(room_id=game_id)
     for player in players:
         deduction_of_costs_personal(player)
-    return
 
 # Изьятие издержек у игрока
 def deduction_of_costs_personal(player):
     player.capital = player.capital - player.esm * 300 - player.egp * 500 - player.simple_fabric_count * 1000 - player.auto_fabric_count * 1500
     player.capital = player.capital - Loan.objects.get(id=player.loan_id).loan_amount*0.01
     player.save()
-    return

@@ -130,6 +130,16 @@ class SurrenderView(View):
             player = PlayerGameInfo.objects.get(room_id=game_id, player_id=request.user.id)
             player.esm_request_id and player.esm_request_id.delete()
             player.egp_request_id and player.egp_request_id.delete()
+            player.loan_id and player.loan_id.delete()
+            build_request_list = BuildRequestList.objects.filter(player_info_id=player.id)
+            for request in build_request_list:
+                build_request = BuildRequest.objects.get(id=request.request_id_id)
+                build_request.delete()
+            auto_request_list = AutomatizationRequestList.objects.filter(player_info_id=player.id)
+            for request in build_request_list:
+                auto_request = AutomatizationRequest.objects.get(id=request.request_id_id)
+                auto_request.delete()
+
             player.delete()
             room = Game.objects.get(id=game_id)
             room.players_count = room.players_count - 1
@@ -253,6 +263,8 @@ class BuyESMView(View):
 
             self.choose_seniors_esm_request(players)
 
+        self.clear_esm_requests()
+
     def choose_seniors_esm_request(self, players):
         players_senior = [x.senioring for x in players]
         min_senior_rang = min(players_senior)
@@ -275,6 +287,12 @@ class BuyESMView(View):
         player.esm = player.esm + esm_count
         player.save()
         esm_request.delete()
+
+    def clear_esm_requests(self):
+        players = PlayerGameInfo.objects.filter(room_id=self.game_id)
+        for player in players:
+            if player.esm_request_id:
+                player.esm_request_id.delete()
 
 # TODO продать ЕГП
 # Продажа ЕГП-Вова
@@ -315,7 +333,8 @@ class SellEGPView(View):
             players = PlayerGameInfo.objects.filter(room_id=self.game_id)
             egp_s = []
             for player in players:
-                egp_s.append(EGPRequest.objects.get(id=player.egp_request_id.id))
+                if player.egp_request_id:
+                    egp_s.append(EGPRequest.objects.get(id=player.egp_request_id.id))
             min_price_egp = min([x.egp_price for x in egp_s])
             egp_request_mass = [x for x in egp_s if x.egp_price == min_price_egp]
             if not egp_request_mass:
@@ -325,6 +344,8 @@ class SellEGPView(View):
                 players.append(PlayerGameInfo.objects.get(room_id=self.game_id,
                     egp_request_id=egp_request.id))
             self.choose_seniors_request(players)
+
+        self.clear_egp_requests()
 
     # здесь формируются игрок чья заявка по старшинству важнее
     def choose_seniors_request(self, players):
@@ -351,6 +372,12 @@ class SellEGPView(View):
         player.save()
         egp_request.delete()
 
+    def clear_egp_requests(self):
+        players = PlayerGameInfo.objects.filter(room_id=self.game_id)
+        for player in players:
+            if player.egp_request_id:
+                player.egp_request_id.delete()
+
 
 class LoanView(View):
     def post(self, request, *args, **kwargs):
@@ -364,6 +391,36 @@ class LoanView(View):
         player.loan_id = loanp.id
         player.player_turn_finish = True
         player.save()
+        if check_turn_finish(game_id):
+            end_turn(game_id)
+
+        return JsonResponse({
+            'success': not error,
+            'error': error
+        })
+
+
+class BuildAutomatizationRequestView(View):
+    def post(self, request, *args, **kwargs):
+        params = json.loads(request.body)
+        simple_build = params.get('simple_build')
+        auto_build = params.get('auto_build')
+        automatization = params.get('automatization')
+        game_id = params.get('game_id')
+        error = None
+
+        game = Game.objects.get(id=game_id)
+
+        build_request = BuildRequest(step=game.step, automatical_fabric_count=auto_build, simple_fabric_count=simple_build)
+        build_request.save()
+        build_request_list = BuildRequestList(player_info_id=request.user.id, request_id=build_request.id)
+        build_request_list.save()
+
+        automatization_request = AutomatizationRequest(step=game.step, count=automatization)
+        automatization_request.save()
+        automatization_request_list = AutomatizationRequestList(player_info_id=request.user.id, request_id=automatization_request.id)
+        automatization_request_list.save()
+
         if check_turn_finish(game_id):
             end_turn(game_id)
 

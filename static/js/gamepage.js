@@ -47,6 +47,13 @@ class Game {
         this.maxSellEGP = gameData.max_sell_egp;
 
         const playersData = gameData.players_data;
+        const playersCards = document.querySelectorAll('player-card');
+        playerIds = playersData.map((el) => {
+            return el.player_id;
+        })
+        playersCards.forEach((card) => {
+            if (!playerIds.includes(Number(card.id))) card.parentNode.removeChild(card);
+        });
         playersData.forEach(el => {
             const playerCard = document.getElementById(el.player_id);
             playerCard.capital = el.capital;
@@ -134,7 +141,7 @@ class Game {
 
         playerCard.addEventListener('buyESMBtnClick', (e) => {
             const wnd = createEl('base-window', {
-                winTitle: 'Заявка на ЕСМ'
+                winTitle: 'Заявка на покупку ЕСМ'
             })
             document.body.appendChild(wnd);
             const winContent = wnd.querySelector('#win-content');
@@ -305,7 +312,7 @@ class Game {
                     </tr>
                 </table>
                 <div class="horizontal-container">Заявка</div>
-                <input id="EGPCountInput" placeholder="Введите количество ЕСМ" type="number" min="0" max="${me.EGPBank}">
+                <input id="EGPCountInput" placeholder="Введите количество ЕГП" type="number" min="0" max="${me.EGPBank}">
                 <input id="costInput" placeholder="Введите цену" type="number" max="${me.maxSellEGP}" min="0">
             `
             const bottomTools = wnd.querySelector('footer');
@@ -339,7 +346,7 @@ class Game {
             }
 
             EGPCountInput.oninput = inputListenerHandler;
-            EGPCountInput.onchange = me.correctInputIntValue.bind(me, EGPCountInput, 0, me.EGPBank)
+            EGPCountInput.onchange = me.correctInputIntValue.bind(me, EGPCountInput, 0, Math.min(me.EGPBank, me.playerCard.EGP));
             costInput.oninput = inputListenerHandler;
             costInput.onchange = () => {
                 me.correctInputIntValue(costInput, 0, me.maxSellEGP)
@@ -376,11 +383,22 @@ class Game {
                 <div>Стоимость автоматизации: <span id="autoCostSpan"></span></div>
             `
             const bottomTools = wnd.querySelector('footer');
+
+            const simpleFabricBuildInput = winContent.querySelector('#simpleFabricBuildInput'),
+                autoFabricBuildInput = winContent.querySelector('#autoFabricBuildInput'),
+                fabricCountAutomatizationInput = winContent.querySelector('#fabricCountAutomatizationInput'),
+                autoCostSpan = winContent.querySelector('#autoCostSpan');
+
             const sendBtn = createEl('button', {
                 innerText: 'Отправить',
                 className: 'middle-button',
                 onclick: function () {
-                    console.log('Send');;
+                    me.sendBuidAutoRequest(
+                        wnd,
+                        simpleFabricBuildInput.valueAsNumber,
+                        autoFabricBuildInput.valueAsNumber,
+                        fabricCountAutomatizationInput.valueAsNumber,
+                    )
                 }
             });
 
@@ -394,11 +412,6 @@ class Game {
                 }),
                 sendBtn
             );
-
-            const simpleFabricBuildInput = winContent.querySelector('#simpleFabricBuildInput'),
-                autoFabricBuildInput = winContent.querySelector('#autoFabricBuildInput'),
-                fabricCountAutomatizationInput = winContent.querySelector('#fabricCountAutomatizationInput'),
-                autoCostSpan = winContent.querySelector('#autoCostSpan');
 
             const inputListenerHandler = () => {
                 const automatizationCost = fabricCountAutomatizationInput.valueAsNumber * 7000,
@@ -430,56 +443,6 @@ class Game {
             };
         });
 
-        // playerCard.addEventListener('automatizationRequestBtnClick',(e) => {
-        //     const wnd = createEl('base-window', {
-        //         winTitle: 'Заявка на автоматизацию фабрик'
-        //     })
-        //     document.body.appendChild(wnd);
-        //     const winContent = wnd.querySelector('#win-content');
-        //     winContent.innerHTML = `
-        //         <div>Количество доступных для автоматизации фабрик: ${me.playerCard.simpleFabrics}</div>
-        //         <hr>
-        //         <input id="fabricCountInput" type="number" placeholder="Введите количество фабрик">
-        //         <div>Стоимость автоматизации: <span id="autoCostSpan"></span></div>
-        //     `
-        //     const bottomTools = wnd.querySelector('footer');
-        //     const sendBtn = createEl('button', {
-        //         innerText: 'Отправить',
-        //         className: 'middle-button',
-        //         onclick: function () {
-        //             console.log('Send');;
-        //         }
-        //     })
-
-        //     bottomTools.append(
-        //         createEl('button', {
-        //             innerText: 'Назад',
-        //             className: 'middle-button',
-        //             onclick: function () {
-        //                 wnd.close();
-        //             }
-        //         }),
-        //         sendBtn
-        //     );
-
-        //     const fabricCountInput = winContent.querySelector('#fabricCountInput'),
-        //         autoCostSpan = winContent.querySelector('#autoCostSpan');
-
-        //     const inputListenerHandler = () => {
-        //         const autoCost = fabricCountInput.valueAsNumber * 7000;
-        //         autoCostSpan.innerText = Number.isNaN(autoCost) ? '' : autoCost + '$';
-        //         sendBtn.disabled = autoCost > me.playerCard.capital;
-        //     }
-
-        //     fabricCountInput.oninput = () => {
-        //         inputListenerHandler()
-        //     }
-        //     fabricCountInput.onchange = () => {
-        //         me.correctInputIntValue(fabricCountInput, 0, me.playerCard.capital / 7000);
-        //         inputListenerHandler()
-        //     };
-        // });
-
         playerCard.addEventListener('loanRequestBtnClick',(e) => {
             const wnd = createEl('base-window', {
                 winTitle: 'Заявка на получение ссуды'
@@ -496,11 +459,23 @@ class Game {
                 </div>
             `
             const bottomTools = wnd.querySelector('footer');
+            const loan = 5000,
+                loan5000 = winContent.querySelector('#loan5000'),
+                loan10000 = winContent.querySelector('#loan10000');
+
+            const setLoan = (e) => {
+                if (e.target.cheched) {
+                    loan = Number(e.target.value);
+                }
+            }
+
+            loan5000.oninput = setLoan;
+            loan10000.oninput = setLoan;
             const sendBtn = createEl('button', {
                 innerText: 'Отправить',
                 className: 'middle-button',
                 onclick: function () {
-                    console.log('Send');;
+                    me.sendLoan(wnd, loan);
                 }
             })
 
@@ -595,6 +570,42 @@ class Game {
         }
     }
 
+    async sendLoan(wnd, loan) {
+        const response = await fetch('loan', {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                loan: loan,
+                game_id: window.GAME_ID
+            })
+        });
+        const obj = await response.json();
+        if (obj.success) {
+            wnd.close();
+        }
+    }
+
+    async sendBuidAutoRequest(wnd, simple_build, auto_build, automatization) {
+        const response = await fetch('build_automatization_request', {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                simple_build: simple_build,
+                auto_build: auto_build,
+                automatization: automatization,
+                game_id: window.GAME_ID
+            })
+        });
+        const obj = await response.json();
+        if (obj.success) {
+            wnd.close();
+        }
+    }
+
     async finalTurn() {
         const response = await fetch('finalTurn', {
             method: 'post',
@@ -605,7 +616,7 @@ class Game {
                 game_id: window.GAME_ID
             })
         });
-        const obj = response.json();
+        const obj = await response.json();
     }
 
     get playersCount() {

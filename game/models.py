@@ -15,6 +15,7 @@ class Game(models.Model):
     level = models.IntegerField(null=True, default=3)
 
     game_stage = models.IntegerField(null=True, blank=True)
+    log = models.TextField(null=True, blank=True)
 
     game_stage_map = {
         1: 'buy_esm',
