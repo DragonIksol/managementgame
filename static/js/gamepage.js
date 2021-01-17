@@ -191,6 +191,78 @@ class Game {
             };
         });
 
+        playerCard.addEventListener('produceBtnClick', (e) => {
+            const wnd = createEl('base-window', {
+                winTitle: 'Заявка на производство ЕГП из ЕСМ'
+            })
+            document.body.appendChild(wnd);
+            const winContent = wnd.querySelector('#win-content');
+            winContent.innerHTML = `
+                <div>Количество доступных для переработки ЕСМ: ${me.playerCard.ESM}</div>
+                <table border="1">
+                    <tr>
+                        <td>Вид фабрики</td>
+                        <td>Количество ЕСМ</td>
+                        <td>Расчёт стоимости</td>
+                    </tr>
+                    <tr>
+                        <td>Обычная</td>
+                        <td><input placeholder="Введите количество ЕСМ" type="number" id="simpleFabricProduce" min="0" value="0"></td>
+                        <td id="simpleProduceCost"></td>
+                    </tr>
+                    <tr>
+                        <td>Автоматизированная</td>
+                        <td><input placeholder="Введите количество ЕСМ" type="number" id="autoFabricProduce" min="0" value="0"></td>
+                        <td id="autoProduceCost"></td>
+                    </tr>
+                </table>
+            `
+
+            const simpleFabricProduce = winContent.querySelector('#simpleFabricProduce'),
+                autoFabricProduce = winContent.querySelector('#autoFabricProduce'),
+                simpleProduceCostTd = winContent.querySelector('#simpleProduceCost'),
+                autoProduceCostTd = winContent.querySelector('#autoProduceCost');
+
+            const bottomTools = wnd.querySelector('footer'),
+                sendBtn = createEl('button', {
+                    innerText: 'Отправить',
+                    className: 'middle-button',
+                    onclick: async () => {
+                        await me.sendProduceBtn(simpleFabricProduce.valueAsNumber, autoFabricProduce.valueAsNumber);
+                    }
+                });
+
+
+            bottomTools.append(
+                createEl('button', {
+                    innerText: 'Назад',
+                    className: 'middle-button',
+                    onclick: function () {
+                        wnd.close();
+                    }
+                }),
+                sendBtn
+            );
+
+            const calcAndValidate = () => {
+                const simpleProduceCost = simpleFabricProduce.valueAsNumber * 2000,
+                    autoProduceCost = Math.floor(autoFabricProduce.valueAsNumber / 2) * 3000 + (autoFabricProduce.valueAsNumber % 2) * 2000,
+                    resultCost = simpleProduceCost + autoProduceCost;
+
+                simpleProduceCostTd.innerText = simpleProduceCost;
+                autoProduceCostTd.innerText = autoProduceCost;
+                sendBtn.disabled = resultCost > me.playerCard.capital;
+            };
+
+            simpleFabricProduce.oninput = () => {
+                calcAndValidate();
+            };
+
+            autoFabricProduce.oninput = () => {
+                calcAndValidate();
+            };
+        });
+
         playerCard.addEventListener('sellEGPBtnClick', (e) => {
             const wnd = createEl('base-window', {
                 winTitle: 'Заявка на ЕГП'
@@ -275,6 +347,10 @@ class Game {
                         <td>20000$</td>
                     </tr>
                 </table>
+                <div>Количество доступных для автоматизации фабрик: ${me.playerCard.simpleFabrics}</div>
+                <hr>
+                <input id="fabricCountAutomatizationInput" type="number" placeholder="Введите количество фабрик">
+                <div>Стоимость автоматизации: <span id="autoCostSpan"></span></div>
             `
             const bottomTools = wnd.querySelector('footer');
             const sendBtn = createEl('button', {
@@ -297,10 +373,23 @@ class Game {
             );
 
             const simpleFabricBuildInput = winContent.querySelector('#simpleFabricBuildInput'),
-                autoFabricBuildInput = winContent.querySelector('#autoFabricBuildInput');
+                autoFabricBuildInput = winContent.querySelector('#autoFabricBuildInput'),
+                fabricCountAutomatizationInput = winContent.querySelector('#fabricCountAutomatizationInput'),
+                autoCostSpan = winContent.querySelector('#autoCostSpan');
 
             const inputListenerHandler = () => {
-                sendBtn.disabled = simpleFabricBuildInput.valueAsNumber + autoFabricBuildInput.valueAsNumber > me.playerCard.capital;
+                const automatizationCost = fabricCountAutomatizationInput.valueAsNumber * 7000,
+                    resultCost = simpleFabricBuildInput.valueAsNumber * 10000 + autoFabricBuildInput.valueAsNumber * 20000 + automatizationCost;
+                const allFabricsCount = me.playerCard.haveFabrics + simpleFabricBuildInput.valueAsNumber + autoFabricBuildInput.valueAsNumber;
+                autoCostSpan.innerText = Number.isNaN(automatizationCost) ? '' : automatizationCost + '$';
+                sendBtn.disabled = allFabricsCount > 6 || resultCost > me.playerCard.capital;
+                if (me.playerCard.haveFabrics > 6) {
+                    sendBtn.title = 'Не может быть больше 6 имеющихся и строящихся фабрик';
+                } else if (resultCost > me.playerCard.capital) {
+                    sendBtn.title = 'Стоимость строительства превышает капитал';
+                } else {
+                    sendBtn.title = '';
+                }
             }
 
             simpleFabricBuildInput.oninput = inputListenerHandler;
@@ -310,78 +399,6 @@ class Game {
             autoFabricBuildInput.oninput = inputListenerHandler;
             autoFabricBuildInput.onchange = () => {
                 me.correctInputIntValue(autoFabricBuildInput, 0, Math.floor((me.playerCard.capital - ((simpleFabricBuildInput.valueAsNumber || 0) * 10000))/20000))
-            };
-        });
-
-        playerCard.addEventListener('produceBtnClick', (e) => {
-            const wnd = createEl('base-window', {
-                winTitle: 'Заявка на производство ЕГП из ЕСМ'
-            })
-            document.body.appendChild(wnd);
-            const winContent = wnd.querySelector('#win-content');
-            winContent.innerHTML = `
-                <div>Количество доступных для переработки ЕСМ: ${me.playerCard.ESM}</div>
-                <table border="1">
-                    <tr>
-                        <td>Вид фабрики</td>
-                        <td>Количество ЕСМ</td>
-                        <td>Расчёт стоимости</td>
-                    </tr>
-                    <tr>
-                        <td>Обычная</td>
-                        <td><input placeholder="Введите количество ЕСМ" type="number" id="simpleFabricProduce" min="0" value="0"></td>
-                        <td id="simpleProduceCost"></td>
-                    </tr>
-                    <tr>
-                        <td>Автоматизированная</td>
-                        <td><input placeholder="Введите количество ЕСМ" type="number" id="autoFabricProduce" min="0" value="0"></td>
-                        <td id="autoProduceCost"></td>
-                    </tr>
-                </table>
-            `
-
-            const bottomTools = wnd.querySelector('footer'),
-                sendBtn = createEl('button', {
-                    innerText: 'Отправить',
-                    className: 'middle-button',
-                    onclick: function () {
-                        console.log('Send');;
-                    }
-                });
-
-
-            bottomTools.append(
-                createEl('button', {
-                    innerText: 'Назад',
-                    className: 'middle-button',
-                    onclick: function () {
-                        wnd.close();
-                    }
-                }),
-                sendBtn
-            );
-
-            const simpleFabricProduce = winContent.querySelector('#simpleFabricProduce'),
-                autoFabricProduce = winContent.querySelector('#autoFabricProduce'),
-                simpleProduceCostTd = winContent.querySelector('#simpleProduceCost'),
-                autoProduceCostTd = winContent.querySelector('#autoProduceCost');
-
-            const calcAndValidate = () => {
-                const simpleProduceCost = simpleFabricProduce.valueAsNumber * 2000,
-                    autoProduceCost = Math.floor(autoFabricProduce.valueAsNumber/2) * 3000 + (autoFabricProduce.valueAsNumber % 2) * 2000,
-                    resultProduceCost = simpleProduceCost + autoProduceCost;
-
-                simpleProduceCostTd.innerText = simpleProduceCost;
-                autoProduceCostTd.innerText = autoProduceCost;
-                sendBtn.disabled = resultProduceCost > me.playerCard.capital;
-            };
-
-            simpleFabricProduce.oninput = () => {
-                calcAndValidate();
-            };
-
-            autoFabricProduce.oninput = () => {
-                calcAndValidate();
             };
         });
 
@@ -504,6 +521,21 @@ class Game {
             },
             body: JSON.stringify({
                 esm_count: ESMCount,
+                cost: cost,
+                game_id: window.GAME_ID
+            })
+        });
+        const obj = response.json();
+    }
+
+    async sendProduceBtn(simpleFabricProduce, autoFabricProduce) {
+        const response = await fetch('produceEGP', {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                simple_fabric_produce: EGPCount,
                 cost: cost,
                 game_id: window.GAME_ID
             })

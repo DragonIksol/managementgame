@@ -201,6 +201,7 @@ customElements.define('player-card',
         }
         set autoFabrics(val) {
             this.#autoFabrics = val;
+            this.haveFabrics = val + this.simpleFabrics;
             this.shadowRoot.getElementById('autoFabrics').innerText = val;
         }
 
