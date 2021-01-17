@@ -64,6 +64,7 @@ class Game {
 
 
                 if (playerCard.playerTurn) {
+                    playerCard.setDisabledActions(true);
                     switch (gameData.game_stage) {
                         case 1: //Купить ЕСМ
                             playerCard.enableBuyESM()
@@ -228,7 +229,7 @@ class Game {
                     innerText: 'Отправить',
                     className: 'middle-button',
                     onclick: async () => {
-                        await me.sendProduceBtn(simpleFabricProduce.valueAsNumber, autoFabricProduce.valueAsNumber);
+                        await me.sendProduceBtn(wnd, simpleFabricProduce.valueAsNumber, autoFabricProduce.valueAsNumber);
                     }
                 });
 
@@ -257,10 +258,32 @@ class Game {
             simpleFabricProduce.oninput = () => {
                 calcAndValidate();
             };
+            simpleFabricProduce.onchange = () => {
+                const autoProduceCost = Math.floor(autoFabricProduce.valueAsNumber / 2) * 3000 + (autoFabricProduce.valueAsNumber % 2) * 2000;
+                const maxSimpleFabricProduce = Math.min(
+                    me.playerCard.simpleFabrics,
+                    (me.playerCard.capital - autoProduceCost) / 2000,
+                    me.playerCard.ESM
+                );
+                me.correctInputIntValue(simpleFabricProduce, 0, maxSimpleFabricProduce);
+                calcAndValidate();
+            }
 
             autoFabricProduce.oninput = () => {
                 calcAndValidate();
             };
+            autoFabricProduce.onchange = () => {
+                const simpleProduceCost = simpleFabricProduce.valueAsNumber * 2000;
+                const capital = me.playerCard.capital - simpleProduceCost;
+                const minValueByCapital = capital % 3000 < 2000 ? Math.floor(capital / 3000) : Math.floor(capital / 3000) + 1;
+                const maxSimpleFabricProduce = Math.min(
+                    me.playerCard.autoFabrics,
+                    minValueByCapital,
+                    me.playerCard.ESM
+                );
+                me.correctInputIntValue(autoFabricProduce, 0, maxSimpleFabricProduce);
+                calcAndValidate();
+            }
         });
 
         playerCard.addEventListener('sellEGPBtnClick', (e) => {
@@ -293,7 +316,7 @@ class Game {
                 onclick: async () => {
                     const EGPCount = winContent.querySelector('#EGPCountInput').valueAsNumber;
                     const cost = winContent.querySelector('#costInput').valueAsNumber;
-                    await me.sendSellEGP(EGPCount, cost);
+                    await me.sendSellEGP(wnd, EGPCount, cost);
                 }
             })
 
@@ -543,12 +566,15 @@ class Game {
                 'Content-Type': 'application/json;charset=utf-8'
             },
             body: JSON.stringify({
-                simple_fabric_produce: simpleFabricProduce,
-                auto_fabric_produce: autoFabricProduce,
+                simple_fabric_produce: simpleFabricProduce || 0,
+                auto_fabric_produce: autoFabricProduce || 0,
                 game_id: window.GAME_ID
             })
         });
-        const obj = response.json();
+        const obj = await response.json();
+        if (obj.success) {
+            wnd.close();
+        }
     }
 
     async sendSellEGP(wnd, EGPCount, cost) {
@@ -563,7 +589,10 @@ class Game {
                 game_id: window.GAME_ID
             })
         });
-        const obj = response.json();
+        const obj = await response.json();
+        if (obj.success) {
+            wnd.close();
+        }
     }
 
     async finalTurn() {

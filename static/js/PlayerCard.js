@@ -19,7 +19,6 @@ button {
         <button disabled id="sellEGPBtn" class="action-btn">Продать ЕГП</button>
         <button disabled id="loanRequestBtn" class="action-btn">Заявка на получение ссуды</button>
         <button disabled id="buildRequestBtn" class="action-btn">Заявка на строительство</button>
-        <button disabled id="automatizationRequestBtn" class="action-btn">Заявка на автоматизацию</button>
     </div>
     <div class="horizontal-container">
         <div id="avatar-container" class="avatar-container">
@@ -120,7 +119,7 @@ customElements.define('player-card',
                 sellEGPBtn = this.shadowRoot.getElementById('sellEGPBtn'),
                 produceBtn = this.shadowRoot.getElementById('produceBtn'),
                 buildRequestBtn = this.shadowRoot.getElementById('buildRequestBtn'),
-                automatizationRequestBtn = this.shadowRoot.getElementById('automatizationRequestBtn'),
+                // automatizationRequestBtn = this.shadowRoot.getElementById('automatizationRequestBtn'),
                 loanRequestBtn = this.shadowRoot.getElementById('loanRequestBtn');
 
             buyESMBtn.onclick = () => {
@@ -135,9 +134,9 @@ customElements.define('player-card',
             buildRequestBtn.onclick = () => {
                 this.dispatchEvent(new CustomEvent('buildRequestBtnClick'));
             };
-            automatizationRequestBtn.onclick = () => {
-                this.dispatchEvent(new CustomEvent('automatizationRequestBtnClick'));
-            };
+            // automatizationRequestBtn.onclick = () => {
+            //     this.dispatchEvent(new CustomEvent('automatizationRequestBtnClick'));
+            // };
             loanRequestBtn.onclick = () => {
                 this.dispatchEvent(new CustomEvent('loanRequestBtnClick'));
             };

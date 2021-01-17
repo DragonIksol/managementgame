@@ -108,7 +108,7 @@ def end_turn(game_id):
 
 # Изьятие издержек у всех игроков
 def deduction_of_costs(game_id):
-    players = PlayerGameInfo.objects.filter(game_id=game_id)
+    players = PlayerGameInfo.objects.filter(room_id=game_id)
     for player in players:
         deduction_of_costs_personal(player)
     return
