@@ -258,22 +258,22 @@ class BuyESMView(View):
         return
 
     def subtraction_of_bids(self, esm_request):
-        if self.esm_count >= esm_request.egp_count:
-            self.esm_count = self.esm_count - esm_request.egp_count
-            self.subtraction_capital_of_buy(esm_request.egp_count, esm_request.esm_price, esm_request)
+        if self.esm_count >= esm_request.esm_count:
+            self.esm_count = self.esm_count - esm_request.esm_count
+            self.subtraction_capital_of_buy(esm_request.esm_count, esm_request.esm_price, esm_request)
         else:
             self.subtraction_capital_of_buy(self.esm_count, esm_request.esm_price, esm_request)
             self.esm_count = 0
         return
 
-        # подсчет капитала после продажи
-        def subtraction_capital_of_buy(self, esm_count, esm_price, esm_request):
-            player = PlayerGameInfo.objects.get(egp_request_id=esm_request.id)
-            player.capital = player.capital + esm_count * esm_price
-            player.save()
-            esm_request.bank_response = True
-            esm_request.save()
-            return
+        # подсчет капитала после покупки
+    def subtraction_capital_of_buy(self, esm_count, esm_price, esm_request):
+        player = PlayerGameInfo.objects.get(esm_request_id=esm_request.id)
+        player.capital = player.capital - esm_count * esm_price
+        player.save()
+        esm_request.bank_response = True
+        esm_request.save()
+        return
 
 # TODO продать ЕГП
 # Продажа ЕГП-Вова
