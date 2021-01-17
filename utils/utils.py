@@ -99,3 +99,21 @@ def deduction_of_costs_personal(player):
     player.capital = player.capital - Loan.objects.get(id=player.loan_id).loan_amount*0.01
     player.save()
     return
+
+#todo переместить в views, это получение ссуды
+def post(self, request, *args, **kwargs):
+    params = json.loads(request.body)
+    loan = params.get('loan')
+    game_id = params.get('game_id')
+    error = None
+    print(loan, game_id)
+    player = PlayerGameInfo.objects.get(player_id=request.user.id, room_id=game_id)
+    loanp = Loan(loan_amount=loan, loan_date=Game.objects.get(id=game_id).step)
+    loanp.save()
+    player.loan_id = loanp.id
+    player.player_turn_finish = True
+    player.save()
+     return JsonResponse({
+        'success': not error,
+        'error': error
+     })
