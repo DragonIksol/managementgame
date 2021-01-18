@@ -61,7 +61,7 @@ def get_next_level(game_id):
         if rand > sum:
             next_level += 1
         else:
-            break
+            return next_level
 
     return next_level
 
