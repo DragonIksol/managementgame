@@ -128,7 +128,7 @@ createRoomBtn.onclick = (e) => {
                         <td>Никнейм участника</td>
                     </tr>
                 `;
-                roomWnd.setAttribute('winTitle', `Созданная вами комната: ${roomName}\t ${data.length}/${playersCount}`);
+                roomWnd.winTitle = `Созданная вами комната: ${roomName}\t ${data.length}/${playersCount}`;
                 data.forEach((el, index) => {
                     roomTableBody.innerHTML += `
                         <tr player_id=${el.player_id}>
@@ -296,6 +296,11 @@ searchRoomBtn.onclick = (e) => {
         clearInterval(updateTableInterval);
         searchRoomWnd.removeEventListener('close', clearIntervalWnd);
         // let checkedRadio = roomTableBody.querySelector('input[name="room"]:checked');
+        while (roomContent.firstChild) roomContent.removeChild(roomContent.lastChild);
+        roomContent.innerHTML = `
+            <center>Ожидание начала игры</center>
+            <center><span id="players-joined"></span></center>
+        `;
         let response = await fetch('createRoom/', {
             method: 'PUT',
             headers: {
@@ -326,6 +331,7 @@ searchRoomBtn.onclick = (e) => {
                 isDeletedRoom = true;
                 searchRoomWnd.close();
             };
+            roomContent.querySelector('#players-joined').innerText = `${obj.players_joined}/${obj.players_count}`
         }, 1000);
         searchRoomWnd.addEventListener('close', async () => {
             if (!isDeletedRoom) {

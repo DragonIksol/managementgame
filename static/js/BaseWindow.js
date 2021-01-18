@@ -58,7 +58,7 @@ customElements.define('base-window',
                 <div class="modal">
                     <div class= "window">
                         <header>
-                            <span>${this.getAttribute('winTitle')}</span>
+                            <div id="base-window-title">${this.getAttribute('winTitle')}</div>
                             <div
                                 id="close-window"
                                 style="
@@ -94,6 +94,29 @@ customElements.define('base-window',
 
         disconnectedCallback() {
             
+        }
+
+        static get observedAttributes() {
+            return ['winTitle'];
+          }
+
+        attributeChangedCallback(name, oldValue, newValue) {
+            switch (name) {
+                case 'winTitle':
+                    this.querySelector('#base-window-title').innerHTML = newValue;
+                    break;
+            
+                default:
+                    break;
+            }
+          }
+
+        get winTitle() {
+            return this.querySelector('#base-window-title');
+        }
+
+        set winTitle(val) {
+            this.querySelector('#base-window-title').innerHTML = val;
         }
     }
 )

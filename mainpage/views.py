@@ -151,12 +151,16 @@ class StartGame(View):
         game_started = False
         room_closed = False
         error = None
+        players_joined = 0
+        players_count = 0
 
         try:
             if Game.objects.filter(id=room_id).exists():
                 room = Game.objects.get(id=room_id)
                 step = room.step
                 print(step)
+                players_joined = len(PlayerGameInfo.objects.filter(room_id=room_id))
+                players_count = room.players_count
                 if step is not None:
                     game_started = True
             else:
@@ -166,6 +170,8 @@ class StartGame(View):
             print(err)
             error = str(err)
         return JsonResponse({
+            'players_joined': players_joined,
+            'players_count': players_count,
             'game_started': game_started,
             'room_closed': room_closed,
             'error': error
