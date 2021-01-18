@@ -106,8 +106,8 @@ def end_month(game_id):
                 upgraderequest.delete()
     #заявка на строительство и апгрейд выполняется
     for playergameinfo in playergameinfos:
-        playergameinfo.egp = playergameinfo.egp + playergameinfo.esm_produce
-        playergameinfo.esm = playergameinfo.esm - playergameinfo.esm_produce
+        playergameinfo.egp = playergameinfo.egp + (playergameinfo.esm_produce or 0)
+        playergameinfo.esm = playergameinfo.esm - (playergameinfo.esm_produce or 0)
         playergameinfo.esm_produce = 0
         playergameinfo.senioring = (playergameinfo.senioring + 1) % game.players_count
         playergameinfo.senior_player = (playergameinfo.senioring == 0)
@@ -123,6 +123,7 @@ def end_turn(game_id):
     game.save()
     for player in players:
         player.player_turn_finish = False
+        player.save()
         if player.capital < 0:
             # player = PlayerGameInfo.objects.get(room_id=game_id, player_id=request.user.id)
             player.esm_request_id and player.esm_request_id.delete()
@@ -137,14 +138,18 @@ def end_turn(game_id):
                 auto_request = AutomatizationRequest.objects.get(id=request.request_id_id)
                 auto_request.delete()
 
+            game.add_log(f'Игрок {player.player_id.username} проиграл')
             player.delete()
-            room = Game.objects.get(id=game_id)
-            room.players_count = room.players_count - 1
-            if room.players_count == 0:
-                room.delete()
+            game.players_count = game.players_count - 1
+            if game.players_count == 0:
+                game.delete()
             else:
-                room.save()
-        player.save()
+                game.save()
+
+    if game.players_count == 1:
+        player_info = PlayerGameInfo.objects.get(room_id=game_id)
+        player_name = Player.objects.get(id=player_info.player_id.id)
+        game.add_log(f'Игрок {player_name} выиграл')
 
 
 

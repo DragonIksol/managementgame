@@ -113,7 +113,8 @@ class GameDataView(View):
             'min_buy_esm': costs_by_level_map[game.level][1],
             'egp_bank': math.floor(costs_by_level_map[game.level][2] * game.players_count),
             'max_sell_egp': costs_by_level_map[game.level][3],
-            'players_data': players_data
+            'players_data': players_data,
+            'game_log': game.log
         })
 
         return JsonResponse({
@@ -151,6 +152,11 @@ class SurrenderView(View):
             if room.players_count == 0:
                 room.delete()
             else:
+                room.add_log(f'Игрок {self.request.user.username} сдался')
+
+                if room.players_count == 1:
+                    player_info = PlayerGameInfo.objects.get(room_id=game_id)
+                    room.add_log(f'Игрок {player_info.player_id.username} выиграл')
                 room.save()
         except BaseException as err:
             print(err)
@@ -257,7 +263,10 @@ class BuyESMView(View):
                 esm_request_id = player.esm_request_id_id
                 if esm_request_id:
                     esm_s.append(ESMRequest.objects.get(id=player.esm_request_id.id))
-            max_price_esm = max([x.esm_price for x in esm_s])
+            prices = [x.esm_price for x in esm_s]
+            if not prices:
+                break
+            max_price_esm = max(prices)
             esm_request_mass = [x for x in esm_s if x.esm_price == max_price_esm]
             if not esm_request_mass:
                 break
@@ -291,7 +300,7 @@ class BuyESMView(View):
         player.capital = player.capital - esm_count * esm_price
         player.esm = player.esm + esm_count
         game = Game.objects.get(id=self.game_id)
-        game.log = game.log + 'Продано игроком' + Player.objects.get(id=self.game_id).last_login + esm_count + 'ЕСМ за'  + esm_count
+        game.add_log(f'Продано игроком {Player.objects.get(id=player.player_id.id).username} {esm_count} ЕСМ за {esm_price}')
         game.save()
         player.save()
         esm_request.delete()
@@ -343,7 +352,11 @@ class SellEGPView(View):
             for player in players:
                 if player.egp_request_id:
                     egp_s.append(EGPRequest.objects.get(id=player.egp_request_id.id))
-            min_price_egp = min([x.egp_price for x in egp_s])
+                    
+            prices = [x.egp_price for x in egp_s]
+            if not prices:
+                break
+            min_price_egp = min(prices)
             egp_request_mass = [x for x in egp_s if x.egp_price == min_price_egp]
             if not egp_request_mass:
                 break
@@ -380,8 +393,7 @@ class SellEGPView(View):
         player.egp = player.egp - egp_count
         player.save()
         game = Game.objects.get(id=self.game_id)
-        game.log = game.log + 'Куплено у игрока' + Player.objects.get(
-            id=self.game_id).last_login + egp_count + 'ЕГП за' + egp_price
+        game.add_log(f'Куплено у игрока {Player.objects.get(id=player.player_id.id).username} {egp_count} ЕГП за {egp_price}')
         game.save()
         egp_request.delete()
 
@@ -432,10 +444,14 @@ class BuildAutomatizationRequestView(View):
 
         player.capital = player.capital - ((simple_build or 0 * 10000) + (auto_build or 0 * 2000))
 
+        game.add_log(f'Игрок {self.request.user.username} начал строить фабрики: {(simple_build or 0) + (auto_build or 0)}')
+
         automatization_request = AutomatizationRequest(step=game.step, count=automatization)
         automatization_request.save()
         automatization_request_list = AutomatizationRequestList(player_info_id=player, request_id=automatization_request)
         automatization_request_list.save()
+
+        game.add_log(f'Игрок {self.request.user.username} начал автоматизировать фабрики: {automatization}')
 
         player.capital = player.capital - (automatization or 0 * 7000)
 

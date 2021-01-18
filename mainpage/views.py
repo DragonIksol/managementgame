@@ -17,6 +17,11 @@ class MainView(TemplateView):
 
         return context
 
+class InfoDevelopView(TemplateView):
+    template_name = 'infodevelop.html'
+class RulesView(TemplateView):
+    template_name = 'rules.html'
+
 
 class CreateRoomView(View):
     def post(self, request, *args, **kwargs):
@@ -193,6 +198,7 @@ class StartGame(View):
 
                 player.save()
             print('game_start')
+            room.log = 'Игра началась'
             room.save()
         except BaseException as err:
             print(err)

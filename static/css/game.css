@@ -73,6 +73,7 @@ fieldset {
 
 textarea {
     width: 100%;
+    color: black;
 }
 
 .big-label {

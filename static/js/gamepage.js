@@ -10,6 +10,7 @@ class Game {
     #EGPBank = 0
     #maxSellEGP = 0
     #playerTurn = false
+    #log = ''
 
     playerCard = null
     watchGameStateInterval = null
@@ -45,6 +46,7 @@ class Game {
         this.minBuyESM = gameData.min_buy_esm;
         this.EGPBank = gameData.egp_bank;
         this.maxSellEGP = gameData.max_sell_egp;
+        this.log = gameData.game_log.replaceAll();
 
         const playersData = gameData.players_data;
         const playersCards = document.querySelectorAll('player-card');
@@ -678,6 +680,14 @@ class Game {
     set playerTurn(val) {
         this.#playerTurn = val;
         document.getElementById('maxSellEGP').innerText = val;
+    }
+
+    get log() {
+        return this.#log;
+    }
+    set log(val) {
+        this.#log = val;
+        document.getElementById('log').innerHTML = val;
     }
 }
 

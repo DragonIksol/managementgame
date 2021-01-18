@@ -24,6 +24,8 @@ class Game(models.Model):
         4: 'get_loan',
         5: 'build_fabrics'
     }
+    def add_log(self, val):
+        self.log += '\n' + val
 
 
 class EGPRequest(models.Model):
