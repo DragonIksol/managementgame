@@ -116,7 +116,9 @@ customElements.define('base-window',
         }
 
         set winTitle(val) {
-            this.querySelector('#base-window-title').innerHTML = val;
+            if (this.querySelector('#base-window-title')) {
+                this.querySelector('#base-window-title').innerHTML = val;
+            }
         }
     }
 )
